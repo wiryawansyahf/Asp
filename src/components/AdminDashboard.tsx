@@ -66,8 +66,9 @@ export const AdminDashboard: React.FC = () => {
   const [showPin, setShowPin] = useState(false);
   const [loginError, setLoginError] = useState('');
 
-  // Product Add / Edit Modal
+  // Product Add / Edit / Delete Modal
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [productSearch, setProductSearch] = useState('');
 
@@ -1235,11 +1236,8 @@ export const initialDailySalesMetrics: DailySalesMetric[] = ${JSON.stringify(dai
                               <span>Edit</span>
                             </button>
                             <button
-                              onClick={() => {
-                                if (confirm(`Yakin ingin menghapus produk "${p.name}"?`)) {
-                                  deleteProduct(p.id);
-                                }
-                              }}
+                              type="button"
+                              onClick={() => setDeletingProduct(p)}
                               className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
                               title="Hapus Produk"
                             >
@@ -1895,6 +1893,47 @@ export const initialDailySalesMetrics: DailySalesMetric[] = ${JSON.stringify(dai
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* IN-APP DELETE CONFIRMATION MODAL (Iframe-safe, no window.confirm) */}
+      {deletingProduct && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/80 animate-in fade-in">
+          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 overflow-hidden p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-bold text-base text-slate-900">
+                  Hapus Produk dari Katalog?
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Produk <strong>"{deletingProduct.name}"</strong> akan dihapus dari katalog website di browser ini.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setDeletingProduct(null)}
+                className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteProduct(deletingProduct.id);
+                  setDeletingProduct(null);
+                }}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-sm transition"
+              >
+                Ya, Hapus Produk
+              </button>
+            </div>
           </div>
         </div>
       )}

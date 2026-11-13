@@ -49,20 +49,23 @@ export const AuthModal: React.FC = () => {
   const [enteredOtp, setEnteredOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [resetSuccessMessage, setResetSuccessMessage] = useState('');
+  const [formError, setFormError] = useState('');
 
   if (!isAuthOpen) return null;
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
     if (!email.trim() || !password.trim()) return;
     login(email, 'customer');
   };
 
   const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
     if (!signupName.trim() || !signupEmail.trim() || !signupPassword.trim()) return;
     if (signupPassword !== signupConfirmPassword) {
-      alert('Konfirmasi password tidak cocok.');
+      setFormError('Konfirmasi password tidak cocok.');
       return;
     }
     login(signupEmail, 'customer', signupName);
@@ -70,6 +73,7 @@ export const AuthModal: React.FC = () => {
 
   const handleRequestOtp = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
     if (!forgotEmail.trim()) return;
 
     // Generate simulated 6-digit OTP
@@ -80,12 +84,13 @@ export const AuthModal: React.FC = () => {
 
   const handleVerifyOtpAndReset = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
     if (enteredOtp !== generatedOtp) {
-      alert('Kode OTP yang Anda masukkan salah. Silakan periksa kembali kode di atas.');
+      setFormError('Kode OTP yang Anda masukkan salah. Silakan periksa kembali kode di atas.');
       return;
     }
     if (!newPassword || newPassword.length < 6) {
-      alert('Password baru minimal 6 karakter.');
+      setFormError('Password baru minimal 6 karakter.');
       return;
     }
 
@@ -297,6 +302,12 @@ export const AuthModal: React.FC = () => {
                 </div>
               </div>
 
+              {formError && (
+                <p className="text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
+                  {formError}
+                </p>
+              )}
+
               <button
                 type="submit"
                 className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-emerald-600/20 transition active:scale-[0.99]"
@@ -408,6 +419,12 @@ export const AuthModal: React.FC = () => {
                       className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500"
                     />
                   </div>
+
+                  {formError && (
+                    <p className="text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
+                      {formError}
+                    </p>
+                  )}
 
                   <button
                     type="submit"

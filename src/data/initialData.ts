@@ -100,8 +100,8 @@ export const initialProducts: Product[] = [
     bestSeller: true,
     isNew: false,
     images: [
-      'https://images.unsplash.com/photo-1580481077195-c322b724db68?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80'
     ],
     description: 'Kursi kerja ergonomis premium dengan lumbar support adaptif yang mengikuti lekuk tulang belakang, sandaran jaring breathable Korea mesh, armrest 4D, dan hidrolik Class 4 bersertifikat BIFMA.',
     descriptionEn: 'Premium ergonomic desk chair with adaptive lumbar tracking, Korean breathable mesh backrest, 4D adjustable armrests, and BIFMA-certified Class 4 heavy-duty gas lift.',
@@ -227,8 +227,8 @@ export const initialProducts: Product[] = [
     bestSeller: true,
     isNew: false,
     images: [
-      'https://images.unsplash.com/photo-1622445262464-84b1456045b6?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1586953208448-b95a79798f07?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1586953208448-b95a79798f07?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80'
     ],
     description: 'Dudukan pengisi daya nirkabel 3-in-1 berbahan kayu solid Walnut alami. Mengisi daya smartphone (15W MagSafe fast charge), smartwatch, dan earbuds secara simultan tanpa kabel berantakan di meja kerja.',
     descriptionEn: '3-in-1 desktop wireless charging station carved from solid natural Walnut wood. Fast-charges smartphone (15W MagSafe), smartwatch, and earbuds simultaneously with neat cable routing.',
