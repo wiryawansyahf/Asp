@@ -1,0 +1,6 @@
+{
+  "name": "Nusantara Catalog & E-Commerce Suite",
+  "description": "Katalog produk interaktif modern dengan integrasi WhatsApp langsung, simulasi pembayaran real-time (QRIS/VA), dashboard admin CMS produk & konten, sistem ulasan pelanggan, multi-bahasa, notifikasi pesanan, dan analitik penjualan harian.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
