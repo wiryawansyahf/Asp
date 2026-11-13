@@ -1,33 +1,46 @@
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
-import { 
-  Product, 
-  CartItem, 
-  Order, 
-  Review, 
-  CompanySettings, 
-  AppNotification, 
-  User, 
-  Language, 
+import {
+  Product,
+  CartItem,
+  Order,
+  Review,
+  CompanySettings,
+  AppNotification,
+  User,
+  Language,
   DailySalesMetric,
-  OrderStatus 
+  OrderStatus,
+  ECatalogItem,
+  DistributorBrand
 } from '../types';
-import { 
-  initialProducts, 
-  initialCompanySettings, 
-  initialReviews, 
-  initialOrders, 
-  initialDailySalesMetrics 
+import {
+  initialProducts,
+  initialCompanySettings,
+  initialReviews,
+  initialOrders,
+  initialDailySalesMetrics,
+  initialECatalogs,
+  initialDistributorBrands
 } from '../data/initialData';
 import { translations } from '../locales/translations';
 
-export type AdminTab = 'analytics' | 'products' | 'orders' | 'header_wa' | 'settings' | 'reviews';
+export type AdminTab =
+  | 'analytics'
+  | 'header_wa'
+  | 'content'
+  | 'products'
+  | 'ecatalogs'
+  | 'brands'
+  | 'orders'
+  | 'settings'
+  | 'reviews';
 export type AuthTab = 'signin' | 'signup' | 'forgot';
 
 interface AppContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: typeof translations.id;
-  
+
   // Route Navigation (/ vs /admin)
   isAdminRoute: boolean;
   navigateTo: (path: '/' | '/admin') => void;
@@ -45,8 +58,22 @@ interface AppContextType {
   selectedProduct: Product | null;
   openProductDetail: (prod: Product) => void;
   closeProductDetail: () => void;
-  
-  // Cart
+
+  // E-Catalogs
+  eCatalogs: ECatalogItem[];
+  selectedECatalog: ECatalogItem | null;
+  setSelectedECatalog: (cat: ECatalogItem | null) => void;
+  addECatalog: (catalog: Omit<ECatalogItem, 'id'>) => void;
+  updateECatalog: (catalog: ECatalogItem) => void;
+  deleteECatalog: (catalogId: string) => void;
+
+  // Distributor Brands & Logos
+  distributorBrands: DistributorBrand[];
+  addDistributorBrand: (brand: Omit<DistributorBrand, 'id'>) => void;
+  updateDistributorBrand: (brand: DistributorBrand) => void;
+  deleteDistributorBrand: (brandId: string) => void;
+
+  // Cart (retained for legacy/compatibility if needed)
   cart: CartItem[];
   addToCart: (product: Product, quantity?: number) => void;
   updateCartQuantity: (productId: string, quantity: number) => void;
@@ -54,35 +81,40 @@ interface AppContextType {
   clearCart: () => void;
   cartTotal: number;
   cartItemCount: number;
-  
-  // Orders & Checkout
+
+  // Orders & Inquiries
   orders: Order[];
   createOrder: (orderInput: Omit<Order, 'id' | 'orderNumber' | 'createdAt'>) => Promise<Order>;
   updateOrderStatus: (orderId: string, status: OrderStatus, trackingNumber?: string) => void;
-  
+
   // Reviews
   reviews: Review[];
   getProductReviews: (productId: string) => Review[];
   addReview: (reviewInput: Omit<Review, 'id' | 'date' | 'helpfulCount'>) => void;
   likeReview: (reviewId: string) => void;
-  
+
   // Company Settings & CMS
   companySettings: CompanySettings;
   updateCompanySettings: (settings: Partial<CompanySettings>) => void;
-  
+
   // Admin CMS for Products & Data Sync
   addProduct: (product: Omit<Product, 'id' | 'rating' | 'reviewCount'>) => void;
   updateProduct: (product: Product) => void;
   deleteProduct: (productId: string) => void;
-  importSiteData: (data: { products?: Product[]; companySettings?: Partial<CompanySettings> }) => void;
-  
+  importSiteData: (data: {
+    products?: Product[];
+    companySettings?: Partial<CompanySettings>;
+    eCatalogs?: ECatalogItem[];
+    distributorBrands?: DistributorBrand[];
+  }) => void;
+
   // Notifications
   notifications: AppNotification[];
   unreadNotificationCount: number;
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
   playNotificationSound: () => void;
-  
+
   // Customer Auth
   currentUser: User | null;
   login: (email: string, role?: 'customer' | 'admin', name?: string) => void;
@@ -94,7 +126,7 @@ interface AppContextType {
   logoutAdmin: () => void;
   adminActiveTab: AdminTab;
   setAdminActiveTab: (tab: AdminTab) => void;
-  
+
   // Modals & Navigation
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
@@ -108,37 +140,51 @@ interface AppContextType {
   setIsOrdersOpen: (open: boolean) => void;
   isCompanyModalOpen: boolean;
   setIsCompanyModalOpen: (open: boolean) => void;
-  
+
   // WhatsApp Helpers
   formatWhatsAppUrl: (message: string) => string;
   createWhatsAppProductInquiryUrl: (product: Product) => string;
   createWhatsAppCartOrderUrl: () => string;
-  
+
   // Daily Sales Metrics
   dailyMetrics: DailySalesMetric[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Safe Audio Chime using Web Audio API (cross-browser, no external audio file failure risk)
+const STORAGE_KEYS = {
+  lang: 'api_lang_v1',
+  products: 'api_products_v1',
+  company: 'api_company_v1',
+  ecatalogs: 'api_ecatalogs_v1',
+  brands: 'api_brands_v2',
+  reviews: 'api_reviews_v1',
+  orders: 'api_orders_v1',
+  cart: 'api_cart_v1',
+  adminAuth: 'api_admin_auth_v1',
+  user: 'api_user_v1'
+};
+
 const playChimeTone = () => {
   try {
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextClass) return;
     const ctx = new AudioContextClass();
-    
+
     const now = ctx.currentTime;
     const osc1 = ctx.createOscillator();
     const osc2 = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(587.33, now); // D5
-    osc1.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
+    osc1.frequency.setValueAtTime(587.33, now);
+    osc1.frequency.exponentialRampToValueAtTime(880, now + 0.15);
 
     osc2.type = 'triangle';
     osc2.frequency.setValueAtTime(880, now);
-    osc2.frequency.exponentialRampToValueAtTime(1174.66, now + 0.2); // D6
+    osc2.frequency.exponentialRampToValueAtTime(1174.66, now + 0.2);
 
     gain.gain.setValueAtTime(0.18, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
@@ -152,32 +198,23 @@ const playChimeTone = () => {
     osc1.stop(now + 0.6);
     osc2.stop(now + 0.6);
   } catch {
-    // Audio might be blocked if user hasn't interacted yet; ignore gracefully
+    // Ignore audio blocks
   }
 };
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Language
   const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem('nc_lang');
-    return (saved === 'en' || saved === 'id') ? saved : 'id';
+    const saved = localStorage.getItem(STORAGE_KEYS.lang);
+    return saved === 'en' || saved === 'id' ? saved : 'id';
   });
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('nc_lang', lang);
+    localStorage.setItem(STORAGE_KEYS.lang, lang);
   };
 
   const t = translations[language];
-
-  // Products
-  const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem('nc_products');
-    if (saved) {
-      try { return JSON.parse(saved); } catch { /* ignore */ }
-    }
-    return initialProducts;
-  });
 
   const isExternalSyncRef = useRef(false);
   const syncChannelRef = useRef<BroadcastChannel | null>(null);
@@ -195,87 +232,169 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+  // Products
+  const [products, setProducts] = useState<Product[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.products);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // ignore
+      }
+    }
+    return initialProducts;
+  });
+
   useEffect(() => {
-    localStorage.setItem('nc_products', JSON.stringify(products));
+    localStorage.setItem(STORAGE_KEYS.products, JSON.stringify(products));
     if (!isExternalSyncRef.current) {
-      broadcastSync('nc_products', products);
+      broadcastSync(STORAGE_KEYS.products, products);
     }
   }, [products]);
 
-  // Company Settings (merged with initialCompanySettings for backwards compatibility)
+  // E-Catalogs
+  const [eCatalogs, setECatalogs] = useState<ECatalogItem[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.ecatalogs);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as ECatalogItem[];
+        if (Array.isArray(parsed)) {
+          return parsed.map((item) => {
+            const fallback = initialECatalogs.find((init) => init.id === item.id);
+            return {
+              ...item,
+              pdfUrl: item.pdfUrl ?? fallback?.pdfUrl ?? `/catalogs/${item.code}.pdf`,
+              pdfFileName: item.pdfFileName ?? fallback?.pdfFileName ?? `${item.code}.pdf`
+            };
+          });
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return initialECatalogs;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.ecatalogs, JSON.stringify(eCatalogs));
+    if (!isExternalSyncRef.current) {
+      broadcastSync(STORAGE_KEYS.ecatalogs, eCatalogs);
+    }
+  }, [eCatalogs]);
+
+  // Distributor Brands & Logos
+  const [distributorBrands, setDistributorBrands] = useState<DistributorBrand[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.brands);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        // ignore
+      }
+    }
+    return initialDistributorBrands;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.brands, JSON.stringify(distributorBrands));
+    if (!isExternalSyncRef.current) {
+      broadcastSync(STORAGE_KEYS.brands, distributorBrands);
+    }
+  }, [distributorBrands]);
+
+  // Company Settings
   const [companySettings, setCompanySettings] = useState<CompanySettings>(() => {
-    const saved = localStorage.getItem('nc_company');
+    const saved = localStorage.getItem(STORAGE_KEYS.company);
     if (saved) {
       try {
         return { ...initialCompanySettings, ...JSON.parse(saved) };
-      } catch { /* ignore */ }
+      } catch {
+        // ignore
+      }
     }
     return initialCompanySettings;
   });
 
   useEffect(() => {
-    localStorage.setItem('nc_company', JSON.stringify(companySettings));
+    localStorage.setItem(STORAGE_KEYS.company, JSON.stringify(companySettings));
     if (!isExternalSyncRef.current) {
-      broadcastSync('nc_company', companySettings);
+      broadcastSync(STORAGE_KEYS.company, companySettings);
     }
   }, [companySettings]);
 
   // Reviews
   const [reviews, setReviews] = useState<Review[]>(() => {
-    const saved = localStorage.getItem('nc_reviews');
+    const saved = localStorage.getItem(STORAGE_KEYS.reviews);
     if (saved) {
-      try { return JSON.parse(saved); } catch { /* ignore */ }
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // ignore
+      }
     }
     return initialReviews;
   });
 
   useEffect(() => {
-    localStorage.setItem('nc_reviews', JSON.stringify(reviews));
+    localStorage.setItem(STORAGE_KEYS.reviews, JSON.stringify(reviews));
     if (!isExternalSyncRef.current) {
-      broadcastSync('nc_reviews', reviews);
+      broadcastSync(STORAGE_KEYS.reviews, reviews);
     }
   }, [reviews]);
 
   // Orders
   const [orders, setOrders] = useState<Order[]>(() => {
-    const saved = localStorage.getItem('nc_orders');
+    const saved = localStorage.getItem(STORAGE_KEYS.orders);
     if (saved) {
-      try { return JSON.parse(saved); } catch { /* ignore */ }
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // ignore
+      }
     }
     return initialOrders;
   });
 
   useEffect(() => {
-    localStorage.setItem('nc_orders', JSON.stringify(orders));
+    localStorage.setItem(STORAGE_KEYS.orders, JSON.stringify(orders));
     if (!isExternalSyncRef.current) {
-      broadcastSync('nc_orders', orders);
+      broadcastSync(STORAGE_KEYS.orders, orders);
     }
   }, [orders]);
 
   // Cart
   const [cart, setCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem('nc_cart');
+    const saved = localStorage.getItem(STORAGE_KEYS.cart);
     if (saved) {
-      try { return JSON.parse(saved); } catch { /* ignore */ }
+      try {
+        return JSON.parse(saved);
+      } catch {
+        // ignore
+      }
     }
     return [];
   });
 
   useEffect(() => {
-    localStorage.setItem('nc_cart', JSON.stringify(cart));
+    localStorage.setItem(STORAGE_KEYS.cart, JSON.stringify(cart));
   }, [cart]);
 
-  // Real-time Cross-Tab Synchronization (storage event + BroadcastChannel)
+  // Real-time Cross-Tab Synchronization
   useEffect(() => {
     const applySyncedData = (key: string, payload: unknown) => {
       isExternalSyncRef.current = true;
-      if (key === 'nc_products' && Array.isArray(payload)) {
+      if (key === STORAGE_KEYS.products && Array.isArray(payload)) {
         setProducts(payload as Product[]);
-      } else if (key === 'nc_company' && payload && typeof payload === 'object') {
+      } else if (key === STORAGE_KEYS.ecatalogs && Array.isArray(payload)) {
+        setECatalogs(payload as ECatalogItem[]);
+      } else if (key === STORAGE_KEYS.brands && Array.isArray(payload)) {
+        setDistributorBrands(payload as DistributorBrand[]);
+      } else if (key === STORAGE_KEYS.company && payload && typeof payload === 'object') {
         setCompanySettings({ ...initialCompanySettings, ...(payload as Partial<CompanySettings>) });
-      } else if (key === 'nc_orders' && Array.isArray(payload)) {
+      } else if (key === STORAGE_KEYS.orders && Array.isArray(payload)) {
         setOrders(payload as Order[]);
-      } else if (key === 'nc_reviews' && Array.isArray(payload)) {
+      } else if (key === STORAGE_KEYS.reviews && Array.isArray(payload)) {
         setReviews(payload as Review[]);
       }
       setTimeout(() => {
@@ -285,11 +404,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     const handleStorage = (e: StorageEvent) => {
       if (!e.key || !e.newValue) return;
-      if (['nc_products', 'nc_company', 'nc_orders', 'nc_reviews'].includes(e.key)) {
+      if (
+        [
+          STORAGE_KEYS.products,
+          STORAGE_KEYS.ecatalogs,
+          STORAGE_KEYS.brands,
+          STORAGE_KEYS.company,
+          STORAGE_KEYS.orders,
+          STORAGE_KEYS.reviews
+        ].includes(e.key)
+      ) {
         try {
           applySyncedData(e.key, JSON.parse(e.newValue));
         } catch {
-          // Ignore malformed JSON
+          // ignore
         }
       }
     };
@@ -297,7 +425,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     window.addEventListener('storage', handleStorage);
 
     if (typeof BroadcastChannel !== 'undefined') {
-      const channel = new BroadcastChannel('nc_sync_channel');
+      const channel = new BroadcastChannel('api_sync_channel');
       syncChannelRef.current = channel;
       channel.onmessage = (event) => {
         const data = event.data;
@@ -317,20 +445,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [notifications, setNotifications] = useState<AppNotification[]>([
     {
       id: 'notif-init-1',
-      title: 'Selamat Datang di Nusantara Catalog',
-      message: 'Sistem siap menerima pesanan dan pertanyaan langsung via WhatsApp & Payment Gateway.',
+      title: 'Selamat Datang di PT Asiaparts Indotech',
+      message: 'Sistem siap menerima konsultasi teknis dan pengadaan komponen via WhatsApp.',
       type: 'system',
-      timestamp: 'Baru saja',
+      timestamp: 'Hari ini',
       read: false
-    },
-    {
-      id: 'notif-init-2',
-      title: 'Pesanan Masuk #NC-202611-8801',
-      message: 'Anindya Putri telah membayar pesanan Rp 1.665.000 via QRIS Real-Time.',
-      type: 'order',
-      timestamp: '14:33 WIB',
-      read: false,
-      orderId: 'ord-8801'
     }
   ]);
 
@@ -373,37 +492,38 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Dedicated Admin Authentication (/admin portal)
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('nc_admin_auth') === 'true';
+    return localStorage.getItem(STORAGE_KEYS.adminAuth) === 'true';
   });
 
   const loginAdmin = () => {
     setIsAdminAuthenticated(true);
-    localStorage.setItem('nc_admin_auth', 'true');
+    localStorage.setItem(STORAGE_KEYS.adminAuth, 'true');
   };
 
   const logoutAdmin = () => {
     setIsAdminAuthenticated(false);
-    localStorage.removeItem('nc_admin_auth');
+    localStorage.removeItem(STORAGE_KEYS.adminAuth);
   };
 
-  // Auth User (Customer)
+  // Auth User
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('nc_user');
+    const saved = localStorage.getItem(STORAGE_KEYS.user);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Ensure public customer session does not show legacy admin badge
         return parsed.role === 'admin' ? null : parsed;
-      } catch { /* ignore */ }
+      } catch {
+        // ignore
+      }
     }
     return null;
   });
 
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem('nc_user', JSON.stringify(currentUser));
+      localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(currentUser));
     } else {
-      localStorage.removeItem('nc_user');
+      localStorage.removeItem(STORAGE_KEYS.user);
     }
   }, [currentUser]);
 
@@ -413,6 +533,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [badgeFilter, setBadgeFilter] = useState<'all' | 'featured' | 'bestseller' | 'promo' | 'new'>('all');
   const [sortBy, setSortBy] = useState<'popular' | 'price_low' | 'price_high' | 'rating' | 'newest'>('popular');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedECatalog, setSelectedECatalog] = useState<ECatalogItem | null>(null);
 
   // Modals state
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -423,7 +544,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
 
-  // Product Detail
   const openProductDetail = (prod: Product) => {
     setSelectedProduct(prod);
   };
@@ -432,15 +552,49 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setSelectedProduct(null);
   };
 
+  // E-Catalog CRUD
+  const addECatalog = (catalogInput: Omit<ECatalogItem, 'id'>) => {
+    const newItem: ECatalogItem = {
+      ...catalogInput,
+      id: `cat-${Date.now()}`
+    };
+    setECatalogs((prev) => [newItem, ...prev]);
+  };
+
+  const updateECatalog = (updated: ECatalogItem) => {
+    setECatalogs((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+  };
+
+  const deleteECatalog = (catalogId: string) => {
+    setECatalogs((prev) => prev.filter((c) => c.id !== catalogId));
+  };
+
+  // Distributor Brand CRUD
+  const addDistributorBrand = (brandInput: Omit<DistributorBrand, 'id'>) => {
+    const newBrand: DistributorBrand = {
+      ...brandInput,
+      id: `brand-${Date.now()}`
+    };
+    setDistributorBrands((prev) => [...prev, newBrand]);
+  };
+
+  const updateDistributorBrand = (updatedBrand: DistributorBrand) => {
+    setDistributorBrands((prev) =>
+      prev.map((b) => (b.id === updatedBrand.id ? updatedBrand : b))
+    );
+  };
+
+  const deleteDistributorBrand = (brandId: string) => {
+    setDistributorBrands((prev) => prev.filter((b) => b.id !== brandId));
+  };
+
   // Cart Actions
   const addToCart = (product: Product, quantity = 1) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
         return prev.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
+          item.product.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
         );
       }
       return [...prev, { product, quantity }];
@@ -453,9 +607,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return;
     }
     setCart((prev) =>
-      prev.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
-      )
+      prev.map((item) => (item.product.id === productId ? { ...item, quantity } : item))
     );
   };
 
@@ -470,52 +622,54 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const cartTotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const cartItemCount = cart.reduce((count, item) => count + item.quantity, 0);
 
-  // Play Sound
   const playNotificationSound = () => {
     playChimeTone();
   };
 
-  // Create Order with Real-Time Notification & Metrics update
-  const createOrder = async (orderInput: Omit<Order, 'id' | 'orderNumber' | 'createdAt'>): Promise<Order> => {
-    const timestampStr = new Date().toLocaleString('id-ID', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    }) + ' WIB';
-    
+  // Create Order / RFQ Inquiry
+  const createOrder = async (
+    orderInput: Omit<Order, 'id' | 'orderNumber' | 'createdAt'>
+  ): Promise<Order> => {
+    const timestampStr =
+      new Date().toLocaleString('id-ID', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) + ' WIB';
+
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const newOrderNumber = `NC-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${randomSuffix}`;
+    const newOrderNumber = `API-${new Date().getFullYear()}${String(
+      new Date().getMonth() + 1
+    ).padStart(2, '0')}-${randomSuffix}`;
     const newOrderId = `ord-${Date.now()}`;
 
     const newOrder: Order = {
       ...orderInput,
       id: newOrderId,
       orderNumber: newOrderNumber,
-      createdAt: timestampStr,
+      createdAt: timestampStr
     };
 
-    // Deduct stock
     setProducts((prev) =>
       prev.map((p) => {
         const orderedItem = orderInput.items.find((item) => item.productId === p.id);
         if (orderedItem) {
-          const newStock = Math.max(0, p.stock - orderedItem.quantity);
-          return { ...p, stock: newStock };
+          return { ...p, stock: Math.max(0, p.stock - orderedItem.quantity) };
         }
         return p;
       })
     );
 
-    // Save order
     setOrders((prev) => [newOrder, ...prev]);
 
-    // Push real-time Admin notification
     const newNotif: AppNotification = {
       id: `notif-${Date.now()}`,
-      title: `Pesanan Baru #${newOrderNumber}`,
-      message: `${newOrder.customerName} baru saja memesan Rp ${newOrder.total.toLocaleString('id-ID')} via ${newOrder.paymentMethod.toUpperCase()}`,
+      title: `Permintaan Baru #${newOrderNumber}`,
+      message: `${newOrder.customerName} mengirim permintaan senilai Rp ${newOrder.total.toLocaleString(
+        'id-ID'
+      )}`,
       type: 'order',
       timestamp: 'Baru saja',
       read: false,
@@ -524,9 +678,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     setNotifications((prev) => [newNotif, ...prev]);
 
-    // Update daily sales metrics
     setDailyMetrics((prev) => {
-      const todayLabel = 'Hari Ini';
       const lastIndex = prev.length - 1;
       const updated = [...prev];
       if (lastIndex >= 0) {
@@ -539,9 +691,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return updated;
     });
 
-    // Play chime sound
     playNotificationSound();
-
     return newOrder;
   };
 
@@ -576,29 +726,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     setReviews((prev) => [newRev, ...prev]);
 
-    // Update Product average rating
     setProducts((prev) =>
       prev.map((prod) => {
         if (prod.id === reviewInput.productId) {
           const currentReviews = reviews.filter((r) => r.productId === prod.id);
-          const totalRating = currentReviews.reduce((sum, r) => sum + r.rating, 0) + reviewInput.rating;
+          const totalRating =
+            currentReviews.reduce((sum, r) => sum + r.rating, 0) + reviewInput.rating;
           const newCount = currentReviews.length + 1;
           const avg = Number((totalRating / newCount).toFixed(1));
-          return {
-            ...prod,
-            rating: avg,
-            reviewCount: newCount
-          };
+          return { ...prod, rating: avg, reviewCount: newCount };
         }
         return prod;
       })
     );
 
-    // Notify admin
     const newNotif: AppNotification = {
       id: `notif-${Date.now()}`,
       title: 'Ulasan Baru Diterima',
-      message: `${reviewInput.userName} memberi rating ⭐ ${reviewInput.rating}/5`,
+      message: `${reviewInput.userName} memberi rating ${reviewInput.rating}/5`,
       type: 'review',
       timestamp: 'Baru saja',
       read: false
@@ -613,12 +758,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     );
   };
 
-  // Company Settings Update
   const updateCompanySettings = (settings: Partial<CompanySettings>) => {
     setCompanySettings((prev) => ({ ...prev, ...settings }));
   };
 
-  // Product CMS
   const addProduct = (productInput: Omit<Product, 'id' | 'rating' | 'reviewCount'>) => {
     const newProduct: Product = {
       ...productInput,
@@ -630,46 +773,50 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updateProduct = (updatedProduct: Product) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
-    );
+    setProducts((prev) => prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)));
   };
 
   const deleteProduct = (productId: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
   };
 
-  const importSiteData = (data: { products?: Product[]; companySettings?: Partial<CompanySettings> }) => {
+  const importSiteData = (data: {
+    products?: Product[];
+    companySettings?: Partial<CompanySettings>;
+    eCatalogs?: ECatalogItem[];
+    distributorBrands?: DistributorBrand[];
+  }) => {
     if (Array.isArray(data.products)) {
       setProducts(data.products);
+    }
+    if (Array.isArray(data.eCatalogs)) {
+      setECatalogs(data.eCatalogs);
+    }
+    if (Array.isArray(data.distributorBrands)) {
+      setDistributorBrands(data.distributorBrands);
     }
     if (data.companySettings && typeof data.companySettings === 'object') {
       setCompanySettings((prev) => ({ ...prev, ...data.companySettings }));
     }
   };
 
-  // Notifications
   const unreadNotificationCount = notifications.filter((n) => !n.read).length;
 
   const markNotificationRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   };
 
   const markAllNotificationsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
-  // Auth
   const login = (email: string, _role: 'customer' | 'admin' = 'customer', name?: string) => {
     const user: User = {
       id: `user-${Date.now()}`,
       name: name || email.split('@')[0],
       email,
       phone: '08123456789',
-      role: 'customer',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'
+      role: 'customer'
     };
     setCurrentUser(user);
     setIsAuthOpen(false);
@@ -688,30 +835,38 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const createWhatsAppProductInquiryUrl = (product: Product) => {
-    const text = `Halo Admin *${companySettings.companyName}*, saya tertarik untuk bertanya/memesan produk berikut:
-    
-📦 *Nama Produk:* ${product.name}
-🏷️ *SKU:* ${product.sku}
-💰 *Harga:* Rp ${product.price.toLocaleString('id-ID')}
-📊 *Stok Tersedia:* ${product.stock} unit
+    const text = `Halo Tim Sales *${companySettings.companyName}*, saya tertarik dan ingin menanyakan informasi produk berikut:
 
-Apakah item ini ready stock dan bisa dikirim hari ini? Mohon informasi ketersediaan dan promo terbarunya. Terima kasih!`;
+• *Nama Produk:* ${product.name}
+• *Part Number / SKU:* ${product.sku}
+• *Kategori:* ${product.category}
+
+Mohon informasinya lebih lanjut. Terima kasih!`;
     return formatWhatsAppUrl(text);
   };
 
   const createWhatsAppCartOrderUrl = () => {
-    if (cart.length === 0) return formatWhatsAppUrl('Halo Admin, saya ingin konsultasi produk.');
-    const itemsList = cart.map((item, idx) => 
-      `${idx + 1}. ${item.product.name} (x${item.quantity}) - Rp ${(item.product.price * item.quantity).toLocaleString('id-ID')}`
-    ).join('\n');
+    if (cart.length === 0) {
+      return formatWhatsAppUrl(
+        `Halo Tim ${companySettings.companyName}, saya ingin konsultasi pengadaan produk.`
+      );
+    }
+    const itemsList = cart
+      .map(
+        (item, idx) =>
+          `${idx + 1}. ${item.product.name} (${item.product.sku}) x${item.quantity} — Rp ${(
+            item.product.price * item.quantity
+          ).toLocaleString('id-ID')}`
+      )
+      .join('\n');
 
-    const text = `Halo Admin *${companySettings.companyName}*, saya ingin memesan barang dari keranjang belanja saya:
+    const text = `Halo Tim Sales *${companySettings.companyName}*, saya ingin mengajukan permintaan penawaran (RFQ) untuk item berikut:
 
 ${itemsList}
 
-💵 *Total Pesanan:* Rp ${cartTotal.toLocaleString('id-ID')}
+Estimasi Total: Rp ${cartTotal.toLocaleString('id-ID')}
 
-Mohon konfirmasi ketersediaan dan langkah pembayaran selanjutnya. Terima kasih!`;
+Mohon konfirmasi ketersediaan stok dan penawaran resmi. Terima kasih!`;
     return formatWhatsAppUrl(text);
   };
 
@@ -735,6 +890,16 @@ Mohon konfirmasi ketersediaan dan langkah pembayaran selanjutnya. Terima kasih!`
         selectedProduct,
         openProductDetail,
         closeProductDetail,
+        eCatalogs,
+        selectedECatalog,
+        setSelectedECatalog,
+        addECatalog,
+        updateECatalog,
+        deleteECatalog,
+        distributorBrands,
+        addDistributorBrand,
+        updateDistributorBrand,
+        deleteDistributorBrand,
         cart,
         addToCart,
         updateCartQuantity,

@@ -40,6 +40,31 @@ export interface Product {
   tags: string[];
 }
 
+export interface ECatalogItem {
+  id: string;
+  code: string;
+  title: string;
+  titleEn: string;
+  category: string;
+  edition: string;
+  pageCount: number;
+  description: string;
+  descriptionEn: string;
+  coverImage: string;
+  highlights: string[];
+  pdfUrl?: string;
+  pdfFileName?: string;
+}
+
+export interface DistributorBrand {
+  id: string;
+  name: string;
+  category: string;
+  status: string;
+  logoUrl: string;
+  description?: string;
+}
+
 export type OrderStatus = 'pending_payment' | 'paid' | 'processing' | 'shipped' | 'completed' | 'cancelled';
 
 export interface CartItem {
@@ -111,6 +136,8 @@ export interface CompanySettings {
   heroTitlePrefix: string;
   heroTitleHighlight: string;
   heroDescription: string;
+  heroImage?: string;
+  contactImage?: string;
   tagline: string;
   taglineEn: string;
   aboutStory: string;
@@ -136,6 +163,82 @@ export interface CompanySettings {
   announcementTextEn: string;
   announcementCtaText: string;
   isAnnouncementActive: boolean;
+
+  // Navbar Menu Labels & CTA
+  navHomeLabel?: string;
+  navAboutLabel?: string;
+  navCatalogLabel?: string;
+  navECatalogLabel?: string;
+  navDistributorLabel?: string;
+  navContactLabel?: string;
+  navWhatsAppLabel?: string;
+
+  // Hero Extra Texts & 3 Stat Cards
+  heroCtaCatalogText?: string;
+  heroCtaWhatsAppText?: string;
+  heroShortcutECatalog?: string;
+  heroShortcutMainProducts?: string;
+  heroShortcutProfile?: string;
+  heroImageCaptionSubtitle?: string;
+  heroStat1Value?: string;
+  heroStat1Label?: string;
+  heroStat1Sub?: string;
+  heroStat2Value?: string;
+  heroStat2Label?: string;
+  heroStat2Sub?: string;
+  heroStat3Value?: string;
+  heroStat3Label?: string;
+  heroStat3Sub?: string;
+
+  // About Us Section Texts & 3 Pillars
+  aboutSectionBadge?: string;
+  aboutTitle?: string;
+  aboutSubtitle?: string;
+  aboutOverviewLabel?: string;
+  aboutPillar1Title?: string;
+  aboutPillar1Sub?: string;
+  aboutPillar2Title?: string;
+  aboutPillar2Sub?: string;
+  aboutPillar3Title?: string;
+  aboutPillar3Sub?: string;
+  aboutProfileBtnText?: string;
+
+  // Catalog Section Texts & Card Labels
+  catalogBadge?: string;
+  catalogTitle?: string;
+  catalogSubtitle?: string;
+  catalogSearchPlaceholder?: string;
+  productDetailBtnText?: string;
+  productInfoBtnText?: string;
+
+  // E-Catalog Section Texts & Button Labels
+  ecatalogBadge?: string;
+  ecatalogTitle?: string;
+  ecatalogSubtitle?: string;
+  ecatalogRequestAllText?: string;
+  ecatalogOpenBtnText?: string;
+  ecatalogDownloadBtnText?: string;
+
+  // Main Products & Brand Section Texts
+  mainDistributorBadge?: string;
+  mainDistributorTitle?: string;
+  mainDistributorSubtitle?: string;
+  brandSectionTitle?: string;
+
+  // Contact Us Section Texts
+  contactBadge?: string;
+  contactTitle?: string;
+  contactSubtitle?: string;
+  contactFormTitle?: string;
+  contactSubmitBtnText?: string;
+  floatingWaDesc?: string;
+
+  // Footer Texts & Regions
+  footerDesc?: string;
+  footerBadge1?: string;
+  footerBadge2?: string;
+  footerRegions?: string[];
+  footerCopyrightText?: string;
 }
 
 export interface DailySalesMetric {

@@ -1,255 +1,207 @@
-import React from 'react';
-import { 
-  Sparkles, 
-  MessageCircle, 
-  ArrowRight, 
-  ShieldCheck, 
-  Truck, 
-  QrCode, 
-  Star, 
+import React, { useState } from 'react';
+import {
+  ArrowRight,
+  MessageCircle,
+  ShieldCheck,
+  Truck,
   Award,
-  CheckCircle2
+  Building2,
+  BookOpen
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export const HeroSection: React.FC = () => {
-  const { 
-    language, 
-    t, 
-    companySettings, 
-    formatWhatsAppUrl, 
-    products, 
-    openProductDetail,
-    setSelectedCategory
-  } = useApp();
+  const { language, t, companySettings, products, eCatalogs, formatWhatsAppUrl } = useApp();
+  const [imgError, setImgError] = useState(false);
 
-  const featuredProduct = products.find((p) => p.featured) || products[0];
+  const heroTitlePrefix =
+    language === 'id' ? companySettings.heroTitlePrefix || t.heroTitlePrefix : t.heroTitlePrefix;
+  const heroTitleHighlight =
+    language === 'id'
+      ? companySettings.heroTitleHighlight || t.heroTitleHighlight
+      : t.heroTitleHighlight;
+  const heroDesc =
+    language === 'id' ? companySettings.heroDescription || t.heroDescription : t.heroDescription;
+  const heroBadgeText =
+    language === 'id' ? companySettings.heroBadge || t.heroBadge : t.heroBadge;
 
-  const handleWhatsAppHero = () => {
-    const text = `Halo Tim Official *${companySettings.companyName}*, saya ingin bertanya seputar katalog produk unggulan dan penawaran terbaik hari ini.`;
-    window.open(formatWhatsAppUrl(text), '_blank');
-  };
-
-  const categories = [
-    'Semua Kategori',
-    'Elektronik & Gadget',
-    'Home & Living',
-    'Kopi & F&B Nusantara',
-    'Fashion & Apparel',
-    'Aksesoris'
+  const stats = [
+    {
+      icon: ShieldCheck,
+      value: companySettings.heroStat1Value?.trim() || `${products.length}+ Series`,
+      label: language === 'id' ? companySettings.heroStat1Label || t.heroStatsProducts : t.heroStatsProducts,
+      sub:
+        language === 'id'
+          ? companySettings.heroStat1Sub || 'Lolos QC Standar Industri'
+          : 'Industrial QC Verified'
+    },
+    {
+      icon: Building2,
+      value: companySettings.heroStat2Value?.trim() || `${eCatalogs.length} Divisi`,
+      label: language === 'id' ? companySettings.heroStat2Label || 'E-Catalog Digital' : 'E-Catalog Digital',
+      sub:
+        language === 'id'
+          ? companySettings.heroStat2Sub || 'Otomasi, Pneumatic, Motion & Bearing'
+          : 'Automation, Pneumatic, Motion & Bearing'
+    },
+    {
+      icon: Truck,
+      value: companySettings.heroStat3Value?.trim() || '38 Provinsi',
+      label: language === 'id' ? companySettings.heroStat3Label || t.heroStatsShipping : t.heroStatsShipping,
+      sub:
+        language === 'id'
+          ? companySettings.heroStat3Sub || 'Distribusi ke Kawasan Industri'
+          : 'Nationwide Industrial Distribution'
+    }
   ];
 
   return (
-    <section id="hero" className="relative overflow-hidden bg-gradient-to-b from-emerald-950 via-slate-900 to-slate-950 text-white pt-10 pb-16 lg:pt-16 lg:pb-24">
-      {/* Decorative ambient background glows */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/3 right-10 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
-          {/* Left Column: Headlines & CTAs */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            
-            {/* Pill Badge */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold backdrop-blur-xs">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{language === 'id' ? (companySettings.heroBadge || t.heroBadge) : t.heroBadge}</span>
+    <section
+      id="hero"
+      className="relative bg-gradient-to-b from-blue-50/70 via-white to-white border-b border-slate-200 pt-10 pb-14 lg:pt-14 lg:pb-20"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        {/* Top Split Layout: Strict items-stretch equal baseline */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
+          {/* Left Column: Corporate Introduction & Direct CTAs */}
+          <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
+            <div className="space-y-5">
+              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-700">
+                <Award className="w-4 h-4 text-blue-700" />
+                <span>{heroBadgeText}</span>
               </div>
-            </div>
 
-            {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
-              {language === 'id' ? (companySettings.heroTitlePrefix || t.heroTitlePrefix) : t.heroTitlePrefix}{' '}
-              <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 bg-clip-text text-transparent">
-                {language === 'id' ? (companySettings.heroTitleHighlight || t.heroTitleHighlight) : t.heroTitleHighlight}
-              </span>
-            </h1>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
+                {heroTitlePrefix}{' '}
+                <span className="text-blue-700">{heroTitleHighlight}</span>
+              </h1>
 
-            {/* Tagline / Subtitle */}
-            <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
-              {language === 'id' ? companySettings.tagline : companySettings.taglineEn}.{' '}
-              {language === 'id' ? (companySettings.heroDescription || t.heroDescription) : t.heroDescription}
-            </p>
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
+                {heroDesc}
+              </p>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-              <a
-                href="#catalog"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <span>{t.heroCtaCatalog}</span>
-                <ArrowRight className="w-4 h-4" />
-              </a>
-
-              <button
-                onClick={handleWhatsAppHero}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 font-semibold text-sm sm:text-base transition-all hover:border-emerald-400"
-              >
-                <MessageCircle className="w-5 h-5 text-emerald-400 fill-emerald-400/20" />
-                <span>{t.heroCtaWhatsApp}</span>
-              </button>
-            </div>
-
-            {/* Quick Category Quick-Filter Tags */}
-            <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-2">
-              <span className="text-xs text-slate-400 font-medium mr-1">Kategori:</span>
-              {categories.map((cat, idx) => (
+              {/* Primary CTAs */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
                 <a
-                  key={idx}
                   href="#catalog"
-                  onClick={() => setSelectedCategory(cat === 'Semua Kategori' ? 'All' : cat)}
-                  className="text-xs px-3 py-1 rounded-full bg-slate-800/80 hover:bg-emerald-900/60 hover:text-emerald-300 text-slate-300 border border-slate-700/60 transition"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-sm shadow-sm transition-colors"
                 >
-                  {cat}
+                  <span>
+                    {language === 'id'
+                      ? companySettings.heroCtaCatalogText || t.heroCtaCatalog
+                      : t.heroCtaCatalog}
+                  </span>
+                  <ArrowRight className="w-4 h-4" />
                 </a>
-              ))}
-            </div>
 
-            {/* Key Trust Badges */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-slate-800/80">
-              <div className="flex items-center gap-2.5 text-left">
-                <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
-                <div>
-                  <h4 className="text-xs font-bold text-slate-200">Garansi Resmi</h4>
-                  <p className="text-[11px] text-slate-400">Ganti Baru 100%</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2.5 text-left">
-                <Truck className="w-5 h-5 text-emerald-400 shrink-0" />
-                <div>
-                  <h4 className="text-xs font-bold text-slate-200">Seluruh RI</h4>
-                  <p className="text-[11px] text-slate-400">Gratis Ongkir Promo</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2.5 text-left">
-                <QrCode className="w-5 h-5 text-emerald-400 shrink-0" />
-                <div>
-                  <h4 className="text-xs font-bold text-slate-200">QRIS Real-Time</h4>
-                  <p className="text-[11px] text-slate-400">Verifikasi Otomatis</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2.5 text-left">
-                <MessageCircle className="w-5 h-5 text-emerald-400 shrink-0" />
-                <div>
-                  <h4 className="text-xs font-bold text-slate-200">WhatsApp 24/7</h4>
-                  <p className="text-[11px] text-slate-400">Respon Hitungan Menit</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Column: Interactive Featured Product Card Preview */}
-          {featuredProduct && (
-          <div className="lg:col-span-5 relative">
-            <div className="relative mx-auto max-w-md bg-gradient-to-br from-slate-800/90 to-slate-900/95 border border-slate-700/80 rounded-3xl p-5 shadow-2xl backdrop-blur-xl group hover:border-emerald-500/50 transition-all duration-300">
-              
-              {/* Top highlight bar */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-700/60">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
-                  <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
-                    Produk Paling Direkomendasikan
-                  </span>
-                </div>
-                {featuredProduct.discountPercentage && featuredProduct.discountPercentage > 0 ? (
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
-                    Hemat {featuredProduct.discountPercentage}%
-                  </span>
-                ) : null}
-              </div>
-
-              {/* Product Image with Hover Zoom */}
-              <div 
-                onClick={() => openProductDetail(featuredProduct)}
-                className="relative mt-4 aspect-4/3 rounded-2xl overflow-hidden cursor-pointer bg-slate-950"
-              >
-                <img
-                  src={featuredProduct.images[0]}
-                  alt={featuredProduct.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-                
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white">
-                  <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-semibold">
-                    <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                    <span>{featuredProduct.rating}</span>
-                    <span className="text-slate-400">({featuredProduct.reviewCount})</span>
-                  </div>
-                  <span className="text-xs font-medium text-emerald-300 bg-emerald-950/80 border border-emerald-500/30 px-2.5 py-1 rounded-full">
-                    Stok: {featuredProduct.stock} unit
-                  </span>
-                </div>
-              </div>
-
-              {/* Product Info */}
-              <div className="mt-4 space-y-2">
-                <p className="text-xs text-emerald-400 font-semibold tracking-wide uppercase">
-                  {featuredProduct.category}
-                </p>
-                <h3 
-                  onClick={() => openProductDetail(featuredProduct)}
-                  className="text-lg font-bold text-white hover:text-emerald-300 cursor-pointer transition line-clamp-1"
-                >
-                  {featuredProduct.name}
-                </h3>
-                <p className="text-xs text-slate-300 line-clamp-2">
-                  {featuredProduct.description}
-                </p>
-
-                {/* Price display */}
-                <div className="flex items-baseline gap-2 pt-1">
-                  <span className="text-xl font-extrabold text-white">
-                    Rp {featuredProduct.price.toLocaleString('id-ID')}
-                  </span>
-                  {featuredProduct.originalPrice && (
-                    <span className="text-xs text-slate-400 line-through">
-                      Rp {featuredProduct.originalPrice.toLocaleString('id-ID')}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Action Buttons for Featured Card */}
-              <div className="grid grid-cols-2 gap-2.5 pt-4 mt-2 border-t border-slate-700/60">
-                <button
-                  onClick={() => openProductDetail(featuredProduct)}
-                  className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-600 transition"
-                >
-                  {t.viewDetails}
-                </button>
                 <a
-                  href={formatWhatsAppUrl(`Halo Admin, saya tertarik dengan produk unggulan *${featuredProduct.name}* (SKU: ${featuredProduct.sku}). Apakah masih ada stok dan promo?`)}
+                  href={formatWhatsAppUrl(
+                    `Halo Tim Sales *${companySettings.companyName}*, saya ingin bertanya seputar produk dan spesifikasi teknis.`
+                  )}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/30 transition"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-blue-50 text-blue-800 border border-blue-200 font-bold text-sm transition-colors"
                 >
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  <span>Tanya WhatsApp</span>
+                  <MessageCircle className="w-4 h-4 text-emerald-600" />
+                  <span>
+                    {language === 'id'
+                      ? companySettings.heroCtaWhatsAppText || t.heroCtaWhatsApp
+                      : t.heroCtaWhatsApp}
+                  </span>
                 </a>
               </div>
+            </div>
 
-              {/* Floating Verified Badge */}
-              <div className="absolute -bottom-4 -left-4 bg-white text-slate-900 rounded-2xl p-3 shadow-xl flex items-center gap-3 border border-slate-200">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
-                  <Award className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1 text-xs font-bold">
-                    <span>Terverifikasi SNI & ISO</span>
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                  </div>
-                  <p className="text-[10px] text-slate-500">100% Produk Original Bergaransi</p>
-                </div>
-              </div>
-
+            {/* Secondary Shortcut Links */}
+            <div className="pt-4 border-t border-slate-200/80 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-600">
+              <a
+                href="#ecatalog"
+                className="inline-flex items-center gap-1.5 hover:text-blue-700 transition-colors"
+              >
+                <BookOpen className="w-4 h-4 text-blue-700" />
+                <span>
+                  {language === 'id'
+                    ? companySettings.heroShortcutECatalog || 'Lihat E-Catalog Digital'
+                    : 'Browse Digital E-Catalog'}
+                </span>
+              </a>
+              <span className="text-slate-300">·</span>
+              <a
+                href="#main-products"
+                className="hover:text-blue-700 transition-colors"
+              >
+                {companySettings.heroShortcutMainProducts ||
+                  'Our Main Products & Distributor Product of PT ASIAPARTS'}
+              </a>
+              <span className="text-slate-300">·</span>
+              <a
+                href="#about"
+                className="hover:text-blue-700 transition-colors"
+              >
+                {language === 'id'
+                  ? companySettings.heroShortcutProfile || 'Profil PT Asiaparts Indotech'
+                  : 'Company Profile'}
+              </a>
             </div>
           </div>
-          )}
 
+          {/* Right Column: Corporate Industrial Engineering Facility Showcase */}
+          <div className="lg:col-span-6 flex">
+            <div className="relative w-full rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 shadow-lg flex flex-col justify-between min-h-[280px] sm:min-h-[340px]">
+              {!imgError && companySettings.heroImage ? (
+                <img
+                  src={companySettings.heroImage}
+                  alt={companySettings.companyName}
+                  referrerPolicy="no-referrer"
+                  onError={() => setImgError(true)}
+                  className="w-full h-full object-cover flex-1"
+                />
+              ) : (
+                <div className="w-full h-full flex-1 bg-gradient-to-br from-blue-800 to-slate-900 flex flex-col items-center justify-center p-8 text-white text-center">
+                  <Building2 className="w-12 h-12 text-blue-300 mb-3" />
+                  <p className="text-lg font-bold">{companySettings.companyName}</p>
+                  <p className="text-xs text-blue-200 mt-1">{companySettings.tagline}</p>
+                </div>
+              )}
+
+              {/* Subtle Bottom Corporate Caption Bar */}
+              <div className="bg-slate-900/90 backdrop-blur-xs text-white px-5 py-3.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-xs font-bold tracking-wide text-blue-300 uppercase">
+                    {companySettings.companyName}
+                  </p>
+                  <p className="text-xs text-slate-200 mt-0.5">
+                    {language === 'id'
+                      ? companySettings.heroImageCaptionSubtitle ||
+                        'Pusat Pengadaan Suku Cadang Industri & Otomasi Presisi'
+                      : 'Industrial Spare Parts & Factory Automation Center'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 3-Column Corporate Trust & Capability KPI Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {stats.map((stat, idx) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={idx}
+                className="bg-white rounded-xl border border-slate-200 p-4 flex items-start gap-3.5 shadow-2xs"
+              >
+                <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 shrink-0">
+                  <Icon className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-extrabold text-slate-900">{stat.value}</p>
+                  <p className="text-xs font-bold text-blue-700">{stat.label}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{stat.sub}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

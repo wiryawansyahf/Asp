@@ -1,308 +1,630 @@
-import { Product, CompanySettings, Review, Order, DailySalesMetric } from '../types';
+import {
+  Product,
+  CompanySettings,
+  Review,
+  Order,
+  DailySalesMetric,
+  ECatalogItem,
+  DistributorBrand
+} from '../types';
+
+const svgDataUri = (inner: string) =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 90" width="260" height="90"><rect width="260" height="90" fill="#ffffff"/>${inner}</svg>`
+  )}`;
+import heroFacilityImg from '../assets/images/hero_asiaparts_facility_1794553949777.jpg';
+import valveImg from '../assets/images/prod_precision_valve_1794553950530.jpg';
+import servoImg from '../assets/images/prod_servo_motor_1794553950354.jpg';
+import plcImg from '../assets/images/prod_plc_module_1794553951293.jpg';
+import bearingImg from '../assets/images/prod_bearing_kit_1794553954009.jpg';
 
 export const initialCompanySettings: CompanySettings = {
-  companyName: 'Nusantara Catalog & Innovations',
-  logoText: 'N',
+  companyName: 'PT Asiaparts Indotech',
+  logoText: 'AI',
   logoUrl: '',
-  headerTitle: 'Nusantara',
-  headerTitleHighlight: 'Catalog',
-  headerSubtitle: 'Official Store & Innovations',
+  headerTitle: 'PT Asiaparts',
+  headerTitleHighlight: 'Indotech',
+  headerSubtitle: 'Industrial Parts & Automation Solutions',
   showWhatsAppInHeader: true,
-  heroBadge: 'Koleksi Eksklusif & Kualitas Terjamin',
-  heroTitlePrefix: 'Solusi Produk Unggulan untuk',
-  heroTitleHighlight: 'Gaya Hidup & Bisnis Anda',
-  heroDescription: 'Jelajahi katalog resmi terlengkap dengan garansi original, pengiriman ke seluruh Nusantara & internasional, kemudahan pesan via WhatsApp, serta pembayaran instan real-time.',
-  tagline: 'Katalog Produk Unggulan & Solusi Gaya Hidup Modern Nusantara',
-  taglineEn: 'Premier Product Catalog & Modern Lifestyle Solutions',
-  aboutStory: 'Berdiri sejak 2019, Nusantara Catalog & Innovations adalah pelopor platform kurasi produk unggulan berstandar tinggi di Indonesia. Kami menghubungkan keunggulan material lokal dengan inovasi desain kelas dunia. Melayani lebih dari 35.000 pelanggan korporat maupun perorangan di 38 provinsi di Indonesia dan mancanegara, kami berkomitmen menjaga transparansi harga, garansi purna jual resmi, serta kemudahan transaksi cepat melalui WhatsApp dan gateway pembayaran real-time.',
-  aboutStoryEn: 'Established in 2019, Nusantara Catalog & Innovations is a premier platform curating high-standard goods in Indonesia. We unite indigenous craftsmanship with world-class engineering. Serving over 35,000 corporate and retail clients across 38 Indonesian provinces and internationally, we uphold absolute pricing transparency, genuine warranty coverage, and frictionless real-time purchasing.',
-  vision: 'Menjadi sentra katalog produk terpercaya nomor satu di Asia Tenggara yang memadukan keunggulan kualitas autentik, teknologi belanja instan, dan kepuasan pelanggan tanpa batas.',
-  visionEn: 'To be Southeast Asia\'s foremost trusted product catalog hub fusing authentic craftsmanship, instant shopping tech, and unparalleled customer satisfaction.',
+  heroBadge: 'Mitra Pengadaan Suku Cadang & Otomasi Industri',
+  heroTitlePrefix: 'Solusi Komponen Industri &',
+  heroTitleHighlight: 'Otomasi Presisi Terpercaya',
+  heroDescription:
+    'PT Asiaparts Indotech menyediakan komponen otomasi industri, pneumatic & valve, linear motion bearing, serta suku cadang mekanikal presisi untuk kebutuhan pabrik dan proyek B2B di seluruh Indonesia.',
+  heroImage: heroFacilityImg,
+  contactImage: heroFacilityImg,
+  tagline: 'Precision Industrial Spareparts, Automation & Technical Support Partner',
+  taglineEn: 'Precision Industrial Spareparts, Automation & Technical Support Partner',
+  aboutStory:
+    'PT Asiaparts Indotech adalah perusahaan penyedia suku cadang presisi, sistem otomasi industri, dan komponen mekanikal-elektrikal yang berfokus mendukung kelancaran lini produksi manufaktur di Indonesia. Dengan dukungan jaringan pemasok tersertifikasi, ketersediaan stok terukur, serta tim teknis berpengalaman, kami melayani pengadaan unit satuan maupun kontrak suplai B2B, lengkap dengan konsultasi spesifikasi dan penawaran cepat melalui WhatsApp.',
+  aboutStoryEn:
+    'PT Asiaparts Indotech is an industrial precision spare parts, factory automation, and electro-mechanical component supplier dedicated to supporting manufacturing reliability across Indonesia. Backed by certified global sourcing, controlled inventory, and experienced technical engineers, we fulfill both single-unit replacements and corporate B2B supply contracts with direct WhatsApp engineering consultation.',
+  vision:
+    'Menjadi mitra pengadaan komponen industri dan otomasi manufaktur paling andal di Indonesia dengan standar kualitas tinggi, ketepatan pengiriman, dan layanan teknis yang responsif.',
+  visionEn:
+    'To become Indonesia’s most dependable industrial spare parts and automation partner driven by certified quality, on-time fulfillment, and responsive engineering support.',
   mission: [
-    'Menyediakan kurasi produk bermutu tinggi dengan spesifikasi teknis transparan dan teruji laboratorium.',
-    'Memberikan pengalaman belanja real-time terintegrasi WhatsApp dan sistem pembayaran multi-kanal instan.',
-    'Menjamin kepastian purna jual, suku cadang, dan garansi pergantian unit tanpa proses berbelit.',
-    'Memberdayakan talenta dan produsen lokal bermutu internasional untuk merambah pasar global.'
+    'Menyediakan komponen otomasi, pneumatic, bearing, dan suku cadang mesin berstandar mutu internasional.',
+    'Memberikan transparansi spesifikasi teknis serta konsultasi langsung melalui tim sales & engineering via WhatsApp.',
+    'Mengembangkan distribusi resmi Our Main Products & Distributor Product of PT ASIAPARTS untuk sektor manufaktur dan otomasi.',
+    'Menjamin ketepatan distribusi serta layanan purna jual yang jelas untuk menjaga keandalan produksi klien.'
   ],
   missionEn: [
-    'Deliver curated high-grade merchandise with transparent, lab-tested technical specifications.',
-    'Provide frictionless real-time shopping integrated with WhatsApp and automated multi-channel payment.',
-    'Guarantee dependable after-sales care, spare parts access, and seamless replacement policies.',
-    'Empower international-grade local craftsmen and manufacturers to capture the global marketplace.'
+    'Supply certified automation, pneumatic, bearing, and precision mechanical spare parts meeting international standards.',
+    'Provide clear technical specification sheets and direct engineering consultation via WhatsApp.',
+    'Expand Our Main Products & Distributor Product of PT ASIAPARTS distribution lines for manufacturing and automation.',
+    'Ensure reliable nationwide distribution and responsive after-sales support to maintain plant uptime.'
   ],
-  founderName: 'Wiryawan Syahfathur, S.T., M.M.',
-  founderRole: 'Founder & Chief Executive Officer',
-  founderBio: 'Berpengalaman lebih dari 12 tahun di bidang supply chain, industri teknologi, dan retail modern di Indonesia. Berkomitmen membangun ekosistem katalog digital yang mengutamakan integritas dan kepuasan konsumen.',
-  founderAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+  founderName: 'Wiryawan Syahfathur',
+  founderRole: 'Direktur Utama · PT Asiaparts Indotech',
+  founderBio:
+    'Berpengalaman dalam rantai pasok komponen manufaktur, sistem otomasi pabrik, dan kemitraan pengadaan B2B lintas sektor industri di Indonesia.',
+  founderAvatar: heroFacilityImg,
   whatsappNumber: '6281234567890',
-  whatsappDefaultMessage: 'Halo Admin, saya ingin menanyakan seputar produk & promo hari ini.',
-  email: 'halo@nusantaracatalog.id',
-  phone: '+62 21 5589 4432',
-  address: 'Menara Nusantara Lantai 18, Jl. Jenderal Sudirman Kav. 52-53, Jakarta Selatan, 12190',
-  operatingHours: 'Senin - Minggu (08.00 - 21.00 WIB)',
-  socialInstagram: '@nusantaracatalog.id',
-  socialFacebook: 'Nusantara Catalog Official',
-  socialLinkedIn: 'linkedin.com/company/nusantara-catalog',
-  announcementText: '🔥 PROMO HARI INI: Gratis Ongkir Seluruh Indonesia + Diskon Tambahan 10% dengan Kode DISKONHEMAT!',
-  announcementTextEn: '🔥 TODAY\'S PROMO: Free Nationwide Shipping + Extra 10% OFF with code DISKONHEMAT!',
-  announcementCtaText: 'Klaim Promo',
-  isAnnouncementActive: true
+  whatsappDefaultMessage:
+    'Halo Tim PT Asiaparts Indotech, saya ingin menanyakan ketersediaan dan spesifikasi produk.',
+  email: 'sales@asiaparts.my.id',
+  phone: '+62 21 8984 2210',
+  address: 'Kawasan Industri Jababeka, Jl. Industri Utama Blok C-12, Cikarang, Bekasi, Jawa Barat 17530',
+  operatingHours: 'Senin - Jumat (08.00 - 17.00 WIB) · Sabtu (08.00 - 13.00 WIB)',
+  socialInstagram: '@asiaparts.indotech',
+  socialFacebook: 'PT Asiaparts Indotech',
+  socialLinkedIn: 'linkedin.com/company/pt-asiaparts-indotech',
+  announcementText:
+    'Layanan Pengadaan B2B & Konsultasi Teknis PT Asiaparts Indotech — Respon Cepat via WhatsApp.',
+  announcementTextEn:
+    'PT Asiaparts Indotech B2B Procurement & Technical Consultation — Fast Response via WhatsApp.',
+  announcementCtaText: 'Chat Sales',
+  isAnnouncementActive: false,
+
+  navHomeLabel: 'Beranda',
+  navAboutLabel: 'Tentang Kami',
+  navCatalogLabel: 'Produk',
+  navECatalogLabel: 'E-Catalog',
+  navDistributorLabel: 'Main & Distributor',
+  navContactLabel: 'Contact Us',
+  navWhatsAppLabel: 'Chat WhatsApp',
+
+  heroCtaCatalogText: 'Lihat Display Produk',
+  heroCtaWhatsAppText: 'Hubungi WhatsApp Sales',
+  heroShortcutECatalog: 'Lihat E-Catalog Digital',
+  heroShortcutMainProducts: 'Our Main Products & Distributor Product of PT ASIAPARTS',
+  heroShortcutProfile: 'Profil PT Asiaparts Indotech',
+  heroImageCaptionSubtitle: 'Pusat Pengadaan Suku Cadang Industri & Otomasi Presisi',
+  heroStat1Value: '',
+  heroStat1Label: 'Produk Terverifikasi',
+  heroStat1Sub: 'Lolos QC Standar Industri',
+  heroStat2Value: '',
+  heroStat2Label: 'E-Catalog Digital',
+  heroStat2Sub: 'Otomasi, Pneumatic, Motion & Bearing',
+  heroStat3Value: '38 Provinsi',
+  heroStat3Label: 'Jangkauan Distribusi',
+  heroStat3Sub: 'Distribusi ke Kawasan Industri',
+
+  aboutSectionBadge: 'Tentang Perusahaan',
+  aboutTitle: 'Mengenal PT Asiaparts Indotech',
+  aboutSubtitle:
+    'Dedikasi kami dalam menyediakan komponen presisi, rantai pasok yang andal, dan dukungan teknis terpadu bagi industri Indonesia.',
+  aboutOverviewLabel: 'Profil Perusahaan & Knowlage',
+  aboutPillar1Title: 'Mutu Terstandar',
+  aboutPillar1Sub: 'QC Terukur',
+  aboutPillar2Title: 'Distribusi Andal',
+  aboutPillar2Sub: 'Nasional',
+  aboutPillar3Title: 'Garansi Resmi',
+  aboutPillar3Sub: 'Purna Jual',
+  aboutProfileBtnText: 'Lihat Profil & Visi Misi Lengkap →',
+
+  catalogBadge: 'Display Produk',
+  catalogTitle: 'Display Produk & Komponen Industri',
+  catalogSubtitle:
+    'Klik produk mana saja untuk melihat spesifikasi teknis lengkap atau hubungi tim kami langsung melalui WhatsApp.',
+  catalogSearchPlaceholder: 'Cari nama produk, part number / SKU, atau spesifikasi...',
+  productDetailBtnText: 'Detail & Spek',
+  productInfoBtnText: 'Info Detail',
+
+  ecatalogBadge: 'E-Catalog Digital',
+  ecatalogTitle: 'E-Catalog Resmi PT Asiaparts Indotech',
+  ecatalogSubtitle:
+    'Jelajahi daftar katalog produk per divisi untuk referensi teknis tim procurement dan engineering perusahaan Anda.',
+  ecatalogRequestAllText: 'Minta Semua E-Catalog via WhatsApp',
+  ecatalogOpenBtnText: 'Buka E-Catalog',
+  ecatalogDownloadBtnText: 'Download File',
+
+  mainDistributorBadge: 'Produk Utama & Distribusi Resmi',
+  mainDistributorTitle: 'Our Main Products & Distributor Product of PT ASIAPARTS',
+  mainDistributorSubtitle:
+    'Rangkaian lini produk utama dan distribusi resmi komponen otomasi, pneumatik, sistem gerak, serta suku cadang mekanikal presisi untuk kebutuhan industri manufaktur.',
+  brandSectionTitle: 'BRAND',
+
+  contactBadge: 'Contact Us',
+  contactTitle: 'Hubungi Tim PT Asiaparts Indotech',
+  contactSubtitle:
+    'Kirim pertanyaan produk, permintaan informasi teknis, atau diskusi pengadaan langsung ke WhatsApp resmi kami.',
+  contactFormTitle: 'Formulir Contact Us — Terhubung ke WhatsApp',
+  contactSubmitBtnText: 'Kirim Pesan via WhatsApp',
+  floatingWaDesc:
+    'Butuh informasi spesifikasi produk atau konsultasi teknis? Chat langsung tim kami via WhatsApp.',
+
+  footerDesc:
+    'PT Asiaparts Indotech — Penyedia komponen otomasi industri, pneumatic, linear motion, bearing, dan suku cadang presisi terpercaya di Indonesia.',
+  footerBadge1: 'Industrial Grade & QC',
+  footerBadge2: 'Main & Distributor Products',
+  footerRegions: [
+    'Jabodetabek & Cikarang',
+    'Jawa & Surabaya',
+    'Sumatera & Batam',
+    'Kalimantan & Sulawesi'
+  ],
+  footerCopyrightText: 'Seluruh Hak Cipta Dilindungi.'
 };
 
 export const initialProducts: Product[] = [
   {
     id: 'prod-001',
-    name: 'Nusantara Apex Wireless ANC Headphone Pro',
-    nameEn: 'Nusantara Apex Wireless ANC Headphone Pro',
-    category: 'Elektronik & Gadget',
+    name: 'Pneumatic Solenoid Control Valve & Regulator SS316',
+    nameEn: 'SS316 Pneumatic Solenoid Control Valve & Pressure Regulator Assembly',
+    category: 'Pneumatic & Valve',
     price: 1850000,
-    originalPrice: 2450000,
-    discountPercentage: 24,
-    stock: 28,
-    sku: 'NC-TECH-001',
+    originalPrice: 2150000,
+    discountPercentage: 14,
+    stock: 42,
+    sku: 'API-PNV-001',
     rating: 4.9,
-    reviewCount: 142,
+    reviewCount: 38,
     featured: true,
     bestSeller: true,
     isNew: false,
-    images: [
-      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80'
-    ],
-    description: 'Headphone nirkabel kelas audiofil dengan Active Noise Cancelling (ANC) hibrida 40dB, driver titanium 40mm, daya tahan baterai hingga 55 jam, dan koneksi multi-point Bluetooth 5.4 latensi rendah.',
-    descriptionEn: 'Audiophile-grade wireless headphone featuring 40dB hybrid Active Noise Cancellation, 40mm titanium drivers, up to 55-hour battery life, and low-latency Bluetooth 5.4 multi-point connectivity.',
+    images: [valveImg, heroFacilityImg],
+    description:
+      'Katup solenoid pneumatik 24VDC dengan regulator tekanan presisi berbahan Stainless Steel AISI 316. Dirancang untuk kontrol aliran udara bertekanan dan fluida industri yang membutuhkan ketahanan korosi tinggi serta pembacaan manometer akurat.',
+    descriptionEn:
+      '24VDC pneumatic solenoid control valve paired with an AISI 316 stainless steel precision pressure regulator and integrated pressure gauge for industrial air and fluid control.',
     specifications: [
-      { label: 'Driver Unit', value: '40mm Custom Titanium Diaphragm' },
-      { label: 'Active Noise Cancelling', value: 'Hybrid ANC -40dB with Ambient Mode' },
-      { label: 'Bluetooth Version', value: 'v5.4 (AAC, SBC, LDAC Hi-Res Audio)' },
-      { label: 'Daya Tahan Baterai', value: '55 Jam (ANC Off) / 42 Jam (ANC On)' },
-      { label: 'Waktu Pengisian', value: 'Fast Charge 10 Menit = 5 Jam Playtime (USB-C)' },
-      { label: 'Mikrofon', value: 'Quad-mic dengan AI Environmental Noise Cancellation' },
-      { label: 'Berat Bersih', value: '248 gram' },
-      { label: 'Garansi', value: '2 Tahun Ganti Baru Resmi' }
+      { label: 'Part Number / SKU', value: 'API-PNV-001 (APR-500 Series)' },
+      { label: 'Material Bodi', value: 'Stainless Steel AISI 316 Anti-Korosi' },
+      { label: 'Tegangan Koil', value: '24VDC (Tersedia opsi 220VAC)' },
+      { label: 'Tekanan Kerja Maksimal', value: '0.5 – 12 Bar (Gauge 0–16 Bar)' },
+      { label: 'Ukuran Port', value: '3/8" BSPP / NPT Threaded + Barb Fitting' },
+      { label: 'Suhu Operasional', value: '-10°C hingga +85°C' },
+      { label: 'Proteksi Koil', value: 'IP65 Dust & Splash Proof, CE Certified' },
+      { label: 'Garansi', value: '12 Bulan Garansi Resmi PT Asiaparts Indotech' }
     ],
-    tags: ['ANC', 'Hi-Res Audio', 'Bluetooth 5.4', 'Titanium Driver']
+    tags: ['Pneumatic', 'Solenoid Valve', 'SS316', '24VDC']
   },
   {
     id: 'prod-002',
-    name: 'Smart Ergonomic Office Chair Nusantara Titan',
-    nameEn: 'Nusantara Titan Smart Ergonomic Office Chair',
-    category: 'Home & Living',
-    price: 3250000,
-    originalPrice: 4100000,
-    discountPercentage: 20,
-    stock: 14,
-    sku: 'NC-FURN-002',
-    rating: 4.8,
-    reviewCount: 88,
+    name: 'Industrial AC Servo Motor 400W + Planetary Gearbox 10:1',
+    nameEn: '400W Industrial Servo Motor with 10:1 Precision Planetary Gearbox',
+    category: 'Motion & Gearbox',
+    price: 4650000,
+    originalPrice: 5200000,
+    discountPercentage: 11,
+    stock: 18,
+    sku: 'API-SRV-002',
+    rating: 4.95,
+    reviewCount: 29,
     featured: true,
     bestSeller: true,
-    isNew: false,
-    images: [
-      'https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80'
-    ],
-    description: 'Kursi kerja ergonomis premium dengan lumbar support adaptif yang mengikuti lekuk tulang belakang, sandaran jaring breathable Korea mesh, armrest 4D, dan hidrolik Class 4 bersertifikat BIFMA.',
-    descriptionEn: 'Premium ergonomic desk chair with adaptive lumbar tracking, Korean breathable mesh backrest, 4D adjustable armrests, and BIFMA-certified Class 4 heavy-duty gas lift.',
+    isNew: true,
+    images: [servoImg, bearingImg],
+    description:
+      'Unit motor servo presisi 400W yang sudah terintegrasi dengan planetary gearbox rasio 10:1 (torsi output hingga 25 Nm). Ideal untuk mesin pengemasan, konveyor sinkron, CNC router, dan lengan otomasi lini produksi.',
+    descriptionEn:
+      '400W precision servo motor coupled with a 10:1 planetary reduction gearbox delivering 25 Nm output torque for packaging machinery, CNC axes, and automated conveyors.',
     specifications: [
-      { label: 'Material Mesh', value: 'Ultra-breathable Korean Hybrid Polymesh' },
-      { label: 'Mekanisme Recline', value: 'Multifunctional Synchronous Tilt 90° - 135°' },
-      { label: 'Armrest', value: '4D (Tinggi, Maju-Mundur, Sudut, Lebar)' },
-      { label: 'Lumbar Support', value: 'Auto-adjust dynamic spine support' },
-      { label: 'Gas Lift', value: 'Heavy Duty Class 4 SGS & BIFMA Tested' },
-      { label: 'Kapasitas Beban', value: 'Hingga 160 kg' },
-      { label: 'Garansi Rangka', value: '5 Tahun Garansi Mekanisme' }
+      { label: 'Part Number / SKU', value: 'API-SRV-002 (AM40-4A-PG10)' },
+      { label: 'Daya Output Motor', value: '400W Continuous · 24VDC / 220VAC Drive Ready' },
+      { label: 'Rasio Gearbox', value: 'Planetary Reduction 10:1 Low Backlash' },
+      { label: 'Torsi Output Nominal', value: '25 Nm (Peak up to 48 Nm)' },
+      { label: 'Diameter Poros (Shaft)', value: '14 mm Keyway H7 Tolerance' },
+      { label: 'Material Housing', value: 'Anodized Aluminum & Hardened Alloy Steel' },
+      { label: 'Encoder Feedback', value: 'High-Resolution Incremental / Absolute 17-bit' },
+      { label: 'Garansi', value: '12 Bulan Garansi Resmi & Dukungan Teknis' }
     ],
-    tags: ['Ergonomic', 'Mesh Korea', 'BIFMA', '4D Armrest']
+    tags: ['Servo Motor', 'Planetary Gearbox', 'CNC', 'Motion Control']
   },
   {
     id: 'prod-003',
-    name: 'Artisan Pour-Over Drip Coffee Maker Set & Grinder',
-    nameEn: 'Artisan Pour-Over Drip Coffee Maker & Conical Grinder Set',
-    category: 'Kopi & F&B Nusantara',
-    price: 890000,
-    originalPrice: 1150000,
-    discountPercentage: 22,
-    stock: 45,
-    sku: 'NC-COFF-003',
+    name: 'DIN-Rail Industrial PLC Controller 16-Channel Ethernet',
+    nameEn: 'DIN-Rail Industrial PLC Automation Controller 16-DI Ethernet',
+    category: 'Automation & PLC',
+    price: 3890000,
+    originalPrice: 4300000,
+    discountPercentage: 10,
+    stock: 25,
+    sku: 'API-PLC-003',
     rating: 4.9,
-    reviewCount: 204,
+    reviewCount: 41,
     featured: true,
     bestSeller: true,
     isNew: true,
-    images: [
-      'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80'
-    ],
-    description: 'Satu set lengkap seduh kopi manual pour-over dengan dripper keramik berulir spiral presisi, server kaca borosilikat tahan panas 600ml, kettle gooseneck termometer, dan hand grinder burr stainless steel.',
-    descriptionEn: 'Complete manual pour-over barista set featuring spiral ceramic dripper, 600ml heat-resistant borosilicate glass server, gooseneck thermometer kettle, and CNC stainless steel conical burr grinder.',
+    images: [plcImg, heroFacilityImg],
+    description:
+      'Modul pengendali logika terprogram (PLC) standar industri pemasangan DIN-rail dengan 2 port Ethernet RJ45 (Modbus TCP / Profinet ready), layar status OLED terintegrasi, dan terminal blok push-in 16 saluran.',
+    descriptionEn:
+      'Industrial DIN-rail PLC automation controller featuring dual Ethernet ports, integrated diagnostic OLED display, and 16 digital I/O push-in terminal channels.',
     specifications: [
-      { label: 'Material Server', value: 'Borosilicate Glass High-Temp Resistant 600ml' },
-      { label: 'Material Dripper', value: 'Ceramic Food Grade V60 Size 02' },
-      { label: 'Kettle Gooseneck', value: 'Stainless Steel 304 Kapasitas 850ml with Bimetal Thermometer' },
-      { label: 'Hand Grinder', value: 'CNC 420 Stainless Steel Burr 38mm (Stepless adjustment)' },
-      { label: 'Aksesoris Termasuk', value: '100 pcs Kertas Filter Bleached + Spoon Barista' },
-      { label: 'Garansi Grinder', value: '1 Tahun Garansi Burr' }
+      { label: 'Part Number / SKU', value: 'API-PLC-003 (AXL-DI16-ETH)' },
+      { label: 'Input Daya', value: '24VDC ±20% Reverse Polarity Protected' },
+      { label: 'Kapasitas I/O', value: '16 Digital Inputs / Expandable Modular Bus' },
+      { label: 'Antarmuka Jaringan', value: 'Dual LAN 10/100 Mbps (Modbus TCP, EtherNet/IP)' },
+      { label: 'Pemasangan', value: 'Standard 35mm DIN-Rail EN 60715' },
+      { label: 'Layar Diagnostik', value: 'OLED Real-time IP, RUN, PWR & Fault Status' },
+      { label: 'Sertifikasi', value: 'CE, UL Industrial Control Equipment' },
+      { label: 'Garansi', value: '18 Bulan Garansi Penggantian Unit' }
     ],
-    tags: ['Specialty Coffee', 'V60 Set', 'Manual Brew', 'Stainless Burr']
+    tags: ['PLC', 'DIN-Rail', 'Modbus TCP', 'Factory Automation']
   },
   {
     id: 'prod-004',
-    name: 'Smart Touchscreen Smartwatch Horizon V5 Pro',
-    nameEn: 'Horizon V5 Pro Smart Touchscreen AMOLED Smartwatch',
-    category: 'Elektronik & Gadget',
-    price: 1450000,
-    originalPrice: 1950000,
-    discountPercentage: 25,
-    stock: 35,
-    sku: 'NC-TECH-004',
-    rating: 4.7,
-    reviewCount: 95,
-    featured: false,
+    name: 'Linear Guide Rail HGR20 + Ball Screw SFU1605 & Bearing Kit',
+    nameEn: 'Precision Linear Guide Rail, Ball Screw & Heavy-Duty Roller Bearing Kit',
+    category: 'Bearing & Linear',
+    price: 2750000,
+    originalPrice: 3100000,
+    discountPercentage: 11,
+    stock: 34,
+    sku: 'API-BRG-004',
+    rating: 4.92,
+    reviewCount: 52,
+    featured: true,
     bestSeller: false,
-    isNew: true,
-    images: [
-      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80'
-    ],
-    description: 'Jam tangan pintar berlayar AMOLED 1.43 inci Always-On Display dengan bodi aluminium alloy penerbangan, sensor detak jantung PPG generasi baru, SpO2 darah, GPS mandiri ganda, dan ketahanan air 5ATM.',
-    descriptionEn: 'Flagship smartwatch with 1.43-inch AMOLED Always-On Display, aerospace-grade aluminum casing, multi-path PPG heart rate & SpO2 tracking, dual-band GPS, and 5ATM water resistance.',
+    isNew: false,
+    images: [bearingImg, servoImg],
+    description:
+      'Paket lengkap komponen gerak linier presisi tinggi yang terdiri dari rel pemandu linier (Linear Guideway), blok carriage pre-loaded, ball screw CNC dengan mur presisi, serta spherical roller bearing beban berat.',
+    descriptionEn:
+      'Complete precision linear motion kit including hardened profile linear guide rails with carriage blocks, ground ball screw assembly, and heavy-duty spherical roller bearings.',
     specifications: [
-      { label: 'Layar', value: '1.43" Ultra-HD AMOLED (466x466 px, 1000 nits Peak)' },
-      { label: 'Bahan Bezel', value: 'Aerospace Aluminum Alloy + Keramik Zirkonia' },
-      { label: 'Sensor Kesehatan', value: 'BioTracker 4.0 PPG (SpO2, Heart Rate, Stress, Sleep Quality)' },
-      { label: 'GPS', value: 'Dual-band 5 Satelit (GPS, GLONASS, Galileo, BeiDou, QZSS)' },
-      { label: 'Baterai', value: '450 mAh (14 Hari Standby / 7 Hari Pemakaian Intens)' },
-      { label: 'Water Resistant', value: '5 ATM (Aman untuk Berenang hingga 50m)' },
-      { label: 'Kompatibilitas', value: 'Android 7.0+ & iOS 12.0+' }
+      { label: 'Part Number / SKU', value: 'API-BRG-004 (LGR-BS-20)' },
+      { label: 'Material Rel & Bearing', value: 'High-Carbon Chromium Bearing Steel (SUJ2)' },
+      { label: 'Tipe Linear Guide', value: 'Series 20 Heavy-Load Flange Block (Z0 Preload)' },
+      { label: 'Ball Screw Spec', value: 'Diameter 16mm · Pitch 5mm · C7 Ground Grade' },
+      { label: 'Tipe Bearing Tambahan', value: 'Spherical & Cylindrical Roller Bearing Brass Cage' },
+      { label: 'Kekerasan Permukaan', value: 'HRC 58 – 62 Induction Hardened' },
+      { label: 'Aplikasi Utama', value: 'Mesin CNC, Laser Cutting, Robot Gantry, Konveyor' },
+      { label: 'Garansi', value: '12 Bulan Garansi Presisi Material' }
     ],
-    tags: ['AMOLED', '5ATM', 'Dual GPS', '14 Hari Baterai']
+    tags: ['Linear Guide', 'Ball Screw', 'Roller Bearing', 'CNC Parts']
   },
   {
     id: 'prod-005',
-    name: 'Tenun & Kulit Asli Nusantara Heritage Briefcase',
-    nameEn: 'Nusantara Heritage Genuine Leather & Ikat Briefcase',
-    category: 'Fashion & Apparel',
-    price: 2150000,
-    originalPrice: 2800000,
-    discountPercentage: 23,
-    stock: 12,
-    sku: 'NC-LEAT-005',
-    rating: 4.95,
-    reviewCount: 67,
-    featured: true,
-    bestSeller: false,
-    isNew: false,
-    images: [
-      'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80'
-    ],
-    description: 'Tas kerja eksekutif pria/wanita buatan tangan pengrajin lokal berbahan 100% Full Grain Pull-Up Cowhide Leather yang dipadukan dengan aksen tenun ikat Jepara autentik. Dilengkapi kompartemen laptop 15.6 inch.',
-    descriptionEn: 'Handcrafted executive briefcase tailored from 100% full-grain vegetable-tanned leather combined with authentic Indonesian handwoven Ikat accents. Dedicated padded compartment for 15.6-inch laptop.',
-    specifications: [
-      { label: 'Material Utama', value: '100% Full-Grain Cowhide Leather Grade A' },
-      { label: 'Aksen Etnik', value: 'Kain Tenun Tradisional Ikat Jepara Tangan Asli' },
-      { label: 'Hardware', value: 'Solid Brass Antik (Bebas Karat seumur hidup)' },
-      { label: 'Kompartemen Laptop', value: 'Padded Velvet Sleeve hingga Laptop 15.6 Inci' },
-      { label: 'Dimensi', value: '41 cm x 30 cm x 9 cm' },
-      { label: 'Tali Bahu', value: 'Kulit Berlapis Kanvas Webbing Heavy Duty (Adjustable)' },
-      { label: 'Garansi Kulit', value: '3 Tahun Garansi Jahitan & Kulit' }
-    ],
-    tags: ['Kulit Asli', 'Handmade', 'Tenun Nusantara', 'Executive']
-  },
-  {
-    id: 'prod-006',
-    name: 'Minimalist Walnut Wood Wireless Charging Station 3-in-1',
-    nameEn: '3-in-1 Minimalist Solid Walnut Wireless Charging Station',
-    category: 'Aksesoris',
-    price: 580000,
-    originalPrice: 750000,
-    discountPercentage: 22,
-    stock: 50,
-    sku: 'NC-WOOD-006',
-    rating: 4.85,
-    reviewCount: 112,
-    featured: false,
-    bestSeller: true,
-    isNew: false,
-    images: [
-      'https://images.unsplash.com/photo-1586953208448-b95a79798f07?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80'
-    ],
-    description: 'Dudukan pengisi daya nirkabel 3-in-1 berbahan kayu solid Walnut alami. Mengisi daya smartphone (15W MagSafe fast charge), smartwatch, dan earbuds secara simultan tanpa kabel berantakan di meja kerja.',
-    descriptionEn: '3-in-1 desktop wireless charging station carved from solid natural Walnut wood. Fast-charges smartphone (15W MagSafe), smartwatch, and earbuds simultaneously with neat cable routing.',
-    specifications: [
-      { label: 'Material', value: 'Kayu Solid Black Walnut Amerika + Paduan Aluminium' },
-      { label: 'Output Pengisian HP', value: '15W / 10W / 7.5W Qi & MagSafe Compatible' },
-      { label: 'Output Watch & TWS', value: 'Watch 3W + Earbuds 5W' },
-      { label: 'Proteksi Keamanan', value: 'Over-voltage, Over-current & Foreign Object Detection' },
-      { label: 'Konektor Daya', value: 'USB Type-C (Termasuk Kabel Braided 1.2m)' },
-      { label: 'Finishing', value: 'Natural Matte Beeswax Polish (Eco-friendly)' }
-    ],
-    tags: ['Solid Walnut', '15W MagSafe', 'Desk Setup', 'Minimalis']
-  },
-  {
-    id: 'prod-007',
-    name: 'Biji Kopi Specialty Nusantara Single Origin Gayo & Toraja (Bundle 2x250g)',
-    nameEn: 'Specialty Nusantara Single Origin Coffee Beans Bundle (Gayo & Toraja)',
-    category: 'Kopi & F&B Nusantara',
-    price: 245000,
-    originalPrice: 310000,
-    discountPercentage: 20,
-    stock: 80,
-    sku: 'NC-COFF-007',
-    rating: 4.96,
-    reviewCount: 318,
-    featured: true,
-    bestSeller: true,
-    isNew: false,
-    images: [
-      'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=800&q=80'
-    ],
-    description: 'Dua varian biji kopi Arabika Specialty Grade 1 pilihan: Aceh Gayo Natural Process (notes: peach, black tea, brown sugar) dan Toraja Sapan Washed Process (notes: dark chocolate, herbal, sweet spice). Dipanggang fresh roast mingguan.',
-    descriptionEn: 'Specialty Grade 1 100% Arabica duo: Aceh Gayo Natural (peach, black tea, brown sugar) and Toraja Sapan Washed (dark chocolate, herbal spice). Freshly roasted weekly with degassing valve bags.',
-    specifications: [
-      { label: 'Varietas', value: '100% Arabika Specialty Grade 1 (SCA Score > 85)' },
-      { label: 'Asal Daerah', value: 'Gayo Takengon (1.500 mdpl) & Toraja Sapan (1.800 mdpl)' },
-      { label: 'Profil Sangrai', value: 'Medium Light Roast (Cocok untuk Filter & Espresso)' },
-      { label: 'Berat Bersih', value: '2 x 250 gram (Total 500g)' },
-      { label: 'Kemasan', value: 'Valve Bag Food Grade dengan Zip Lock Kedap Udara' },
-      { label: 'Rekomendasi Seduh', value: 'V60, French Press, Aeropress, Espresso' }
-    ],
-    tags: ['Specialty Coffee', 'SCA 85+', 'Aceh Gayo', 'Toraja Sapan']
-  },
-  {
-    id: 'prod-008',
-    name: 'Smart Air Purifier HEPA 13 Ionizer Nusantara PureClean',
-    nameEn: 'Nusantara PureClean H13 True HEPA Air Purifier & Ionizer',
-    category: 'Home & Living',
-    price: 1980000,
-    originalPrice: 2600000,
-    discountPercentage: 23,
-    stock: 19,
-    sku: 'NC-HOME-008',
-    rating: 4.88,
-    reviewCount: 79,
+    name: 'High-Pressure Brass & Stainless Check Valve Manifold 3/8"',
+    nameEn: 'Industrial High-Pressure Stainless Manifold & Air Prep Unit',
+    category: 'Pneumatic & Valve',
+    price: 1290000,
+    stock: 60,
+    sku: 'API-PNV-005',
+    rating: 4.8,
+    reviewCount: 21,
     featured: false,
     bestSeller: false,
     isNew: true,
-    images: [
-      'https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80'
-    ],
-    description: 'Pembersih udara ruangan dengan filter True HEPA H13 4 lapis dan plasma ionizer. Menghilangkan 99.97% debu mikroskopis PM2.5, asap, bulu hewan, virus dan bau ruangan. Dilengkapi sensor PM2.5 real-time & kontrol aplikasi HP.',
-    descriptionEn: 'Room air purifier featuring medical-grade 4-stage True HEPA H13 filtration and plasma ionizer. Eliminates 99.97% of airborne PM2.5 particles, allergens, bacteria, and odors with live air sensor.',
+    images: [valveImg],
+    description:
+      'Unit manifold katup pengatur tekanan dengan knob kontrol mikrometer untuk kestabilan tekanan udara mesin stamping, mesin pengisian botol, dan jalur perakitan otomatis.',
+    descriptionEn:
+      'Precision manifold air pressure regulator unit with micrometer flow dial for stamping presses, bottling machines, and pneumatic assembly stations.',
     specifications: [
-      { label: 'Sistem Filter', value: 'Pre-filter + H13 True HEPA + Karbon Aktif + Plasma Ion' },
-      { label: 'CADR Rating', value: '380 m³/jam (Efektif untuk ruangan hingga 50 m²)' },
-      { label: 'Tingkat Kebisingan', value: 'Sleep Mode 24 dB (Sangat hening tidak mengganggu)' },
-      { label: 'Sensor Kualitas Udara', value: 'Laser PM2.5 dengan Lampu Indikator 4 Warna' },
-      { label: 'Konsumsi Daya', value: 'Hemat listrik 35 Watt' },
-      { label: 'Garansi Mesin', value: '2 Tahun Garansi Resmi Sparepart' }
+      { label: 'Part Number / SKU', value: 'API-PNV-005' },
+      { label: 'Material', value: 'AISI 316 Stainless Steel + Viton Seal' },
+      { label: 'Rentang Tekanan', value: '0.2 – 10 Bar' },
+      { label: 'Koneksi Pipa', value: '3/8 Inch Female Thread' },
+      { label: 'Akurasi Pengukuran', value: 'Class 1.6 Glycerine-Ready Gauge' }
     ],
-    tags: ['True HEPA H13', 'PM2.5 Sensor', 'Silent 24dB', 'Ionizer']
+    tags: ['Manifold', 'Regulator', 'Pneumatic']
+  },
+  {
+    id: 'prod-006',
+    name: 'Compact Industrial Power Supply & PLC Expansion Module 24V',
+    nameEn: 'Industrial 24VDC DIN-Rail Power & PLC I/O Expansion Kit',
+    category: 'Automation & PLC',
+    price: 1650000,
+    stock: 48,
+    sku: 'API-PLC-006',
+    rating: 4.85,
+    reviewCount: 19,
+    featured: false,
+    bestSeller: false,
+    isNew: false,
+    images: [plcImg],
+    description:
+      'Modul ekspansi input/output dan catu daya panel kontrol industri 24VDC yang stabil, tahan lonjakan tegangan, dan mudah dipelihara untuk panel mesin produksi.',
+    descriptionEn:
+      'Stabilized 24VDC industrial DIN-rail control power and modular I/O expansion unit engineered for factory electrical cabinets.',
+    specifications: [
+      { label: 'Part Number / SKU', value: 'API-PLC-006' },
+      { label: 'Tegangan Output', value: '24VDC Regulated (5A / 120W)' },
+      { label: 'Proteksi', value: 'Short-Circuit, Overload & Over-Voltage Protection' },
+      { label: 'Mounting', value: 'DIN-Rail 35mm Compact Footprint' }
+    ],
+    tags: ['Power Supply', '24VDC', 'Panel Industri']
+  },
+  {
+    id: 'prod-007',
+    name: 'Heavy-Duty Spherical & Cylindrical Industrial Bearing Set',
+    nameEn: 'Heavy-Duty Industrial Spherical & Cylindrical Bearing Set',
+    category: 'Bearing & Linear',
+    price: 1420000,
+    stock: 75,
+    sku: 'API-BRG-007',
+    rating: 4.9,
+    reviewCount: 34,
+    featured: false,
+    bestSeller: true,
+    isNew: false,
+    images: [bearingImg],
+    description:
+      'Set bearing rol silindris dan sferis dengan sangkar kuningan (brass cage) berdaya tahan tinggi terhadap beban radial berat, getaran mesin tambang, pompa industri, dan gearbox besar.',
+    descriptionEn:
+      'Heavy-duty spherical and cylindrical roller bearings with machined brass cages designed for high radial loads in pumps, crushers, and industrial gearboxes.',
+    specifications: [
+      { label: 'Part Number / SKU', value: 'API-BRG-007' },
+      { label: 'Tipe Sangkar (Cage)', value: 'Machined Solid Brass Cage (EM/MB)' },
+      { label: 'Clearance Standar', value: 'C3 / CN Precision Grade' },
+      { label: 'Maksimal Suhu Kerja', value: 'Hingga +150°C Stabilized Ring' }
+    ],
+    tags: ['Roller Bearing', 'Brass Cage', 'Heavy Duty']
+  },
+  {
+    id: 'prod-008',
+    name: 'High-Torque Planetary Gearbox Reducer Nema34 / 80mm Flange',
+    nameEn: 'Precision Low-Backlash Planetary Gearbox Reducer 80mm Flange',
+    category: 'Motion & Gearbox',
+    price: 2350000,
+    stock: 22,
+    sku: 'API-SRV-008',
+    rating: 4.88,
+    reviewCount: 16,
+    featured: false,
+    bestSeller: false,
+    isNew: true,
+    images: [servoImg],
+    description:
+      'Gearbox planetary presisi rendah backlash (< 5 arcmin) untuk motor servo 400W–750W maupun stepper Nema 34. Dilengkapi segel pelumasan seumur hidup bebas perawatan.',
+    descriptionEn:
+      'Low-backlash (< 5 arcmin) planetary speed reducer compatible with 400W–750W servo motors and NEMA 34 frames, pre-lubricated for maintenance-free operation.',
+    specifications: [
+      { label: 'Part Number / SKU', value: 'API-SRV-008' },
+      { label: 'Rasio Tersedia', value: '5:1 / 10:1 / 20:1' },
+      { label: 'Backlash Presisi', value: '≤ 5 arcmin (Single Stage)' },
+      { label: 'Efisiensi Transmisi', value: '≥ 96%' }
+    ],
+    tags: ['Gearbox', 'Planetary', 'Low Backlash']
+  }
+];
+
+export const initialECatalogs: ECatalogItem[] = [
+  {
+    id: 'cat-001',
+    code: 'ECAT-API-2026-01',
+    title: 'E-Catalog Otomasi & Sistem Kontrol PLC',
+    titleEn: 'Factory Automation & PLC Control Systems E-Catalog',
+    category: 'Automation & PLC',
+    edition: 'Edisi 2026 · Rev 2.1',
+    pageCount: 28,
+    description:
+      'Daftar lengkap modul PLC DIN-Rail, HMI, Industrial Ethernet Switch, sensor fotoelektrik, serta catu daya 24VDC untuk integrasi panel kontrol pabrik.',
+    descriptionEn:
+      'Complete lineup of DIN-rail PLCs, HMIs, industrial Ethernet switches, sensors, and 24VDC control power supplies for factory electrical panels.',
+    coverImage: plcImg,
+    highlights: [
+      'PLC Controller 16–64 I/O Modbus TCP & Profinet',
+      'Industrial Power Supply 24VDC 5A – 20A',
+      'Proximity, Photoelectric & Laser Sensors'
+    ],
+    pdfUrl: '/catalogs/ECAT-API-2026-01.pdf',
+    pdfFileName: 'ECAT-API-2026-01-Otomasi-PLC.pdf'
+  },
+  {
+    id: 'cat-002',
+    code: 'ECAT-API-2026-02',
+    title: 'E-Catalog Pneumatic, Solenoid Valve & Hidrolik',
+    titleEn: 'Pneumatic, Solenoid Valve & Air Preparation E-Catalog',
+    category: 'Pneumatic & Valve',
+    edition: 'Edisi 2026 · Rev 1.8',
+    pageCount: 36,
+    description:
+      'Katalog teknis komponen udara bertekanan: Solenoid Valve SS316/Brass, Air Cylinder ISO 15552, FRL Unit, Pressure Gauge, dan Push-In Fittings.',
+    descriptionEn:
+      'Technical catalog for compressed air systems: SS316/Brass solenoid valves, ISO 15552 air cylinders, FRL units, gauges, and industrial fittings.',
+    coverImage: valveImg,
+    highlights: [
+      'Solenoid Control Valve 24VDC / 220VAC',
+      'Regulator Tekanan & Manifold Stainless AISI 316',
+      'Silinder Pneumatik & Selang PU Tekanan Tinggi'
+    ],
+    pdfUrl: '/catalogs/ECAT-API-2026-02.pdf',
+    pdfFileName: 'ECAT-API-2026-02-Pneumatic-Valve.pdf'
+  },
+  {
+    id: 'cat-003',
+    code: 'ECAT-API-2026-03',
+    title: 'E-Catalog Linear Motion, Bearing & Ball Screw',
+    titleEn: 'Precision Linear Motion, Bearing & Ball Screw E-Catalog',
+    category: 'Bearing & Linear',
+    edition: 'Edisi 2026 · Rev 3.0',
+    pageCount: 42,
+    description:
+      'Panduan ukuran, dimensi mounting, dan kapasitas beban (dynamic load rating) untuk Linear Guideway, Ball Screw CNC, serta Industrial Roller Bearings.',
+    descriptionEn:
+      'Dimensional tables, mounting references, and dynamic load ratings for linear guideways, CNC ball screws, and heavy-duty industrial bearings.',
+    coverImage: bearingImg,
+    highlights: [
+      'Linear Guideway HGR15 / HGR20 / HGR25 / HGR30',
+      'Ball Screw SFU1605 / SFU2005 + End Support BK/BF',
+      'Spherical, Tapered & Cylindrical Roller Bearings'
+    ],
+    pdfUrl: '/catalogs/ECAT-API-2026-03.pdf',
+    pdfFileName: 'ECAT-API-2026-03-Linear-Bearing.pdf'
+  },
+  {
+    id: 'cat-004',
+    code: 'ECAT-API-2026-04',
+    title: 'E-Catalog Servo Motor & Planetary Gearbox',
+    titleEn: 'Servo Drives, Motors & Planetary Gearbox E-Catalog',
+    category: 'Motion & Gearbox',
+    edition: 'Edisi 2026 · Rev 1.4',
+    pageCount: 24,
+    description:
+      'Spesifikasi torsi, kurva kecepatan, dan diagram wiring untuk Servo Motor 200W–3kW, Inverter VFD, dan Planetary Gearbox presisi rendah backlash.',
+    descriptionEn:
+      'Torque specs, speed curves, and wiring references for 200W–3kW AC servo systems, VFD drives, and low-backlash planetary gearboxes.',
+    coverImage: servoImg,
+    highlights: [
+      'AC Servo Motor & Driver 200W – 3.0kW',
+      'Planetary Gearbox Rasio 3:1 hingga 100:1',
+      'Coupling Fleksibel & Mounting Bracket Presisi'
+    ],
+    pdfUrl: '/catalogs/ECAT-API-2026-04.pdf',
+    pdfFileName: 'ECAT-API-2026-04-Servo-Gearbox.pdf'
+  }
+];
+
+export const initialDistributorBrands: DistributorBrand[] = [
+  {
+    id: 'brand-001',
+    name: 'KLAB',
+    category: 'Automation & PLC',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<polygon points="48,26 68,26 55,44 68,58 48,58" fill="#002b5c"/><rect x="38" y="26" width="8" height="32" fill="#002b5c"/><text x="72" y="56" font-family="Arial,sans-serif" font-weight="900" font-size="30" fill="#002b5c">LAB</text><text x="130" y="74" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="#475569">Keen Innovative Solutions</text>`
+    )
+  },
+  {
+    id: 'brand-002',
+    name: 'ZEISS',
+    category: 'Automation & PLC',
+    status: 'Authorized Partner',
+    logoUrl: svgDataUri(
+      `<path d="M26 24 H66 V48 C66 58 46 66 46 66 C46 66 26 58 26 48 Z" fill="#004a99"/><text x="46" y="47" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="11" fill="#ffffff">ZEISS</text><text x="76" y="44" font-family="Arial,sans-serif" font-weight="700" font-size="14" fill="#1e293b">#HandsOnMetrology</text><text x="76" y="59" font-family="Arial,sans-serif" font-weight="600" font-size="10" letter-spacing="1" fill="#64748b">PARTNER</text>`
+    )
+  },
+  {
+    id: 'brand-003',
+    name: 'Hanon',
+    category: 'Automation & PLC',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<rect x="44" y="26" width="12" height="36" fill="#ea7600"/><rect x="66" y="26" width="12" height="36" fill="#ea7600"/><rect x="52" y="38" width="18" height="10" fill="#ea7600"/><text x="84" y="61" font-family="Arial,sans-serif" font-weight="800" font-size="31" fill="#ea7600">anon</text>`
+    )
+  },
+  {
+    id: 'brand-004',
+    name: 'JFE Advantech Co., Ltd.',
+    category: 'Automation & PLC',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<circle cx="38" cy="43" r="14" fill="#0284c7"/><circle cx="34" cy="39" r="5" fill="#7dd3fc"/><text x="38" y="69" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="10" fill="#0f172a">JFE</text><text x="60" y="48" font-family="Georgia,serif" font-weight="700" font-size="15.5" fill="#0f172a">JFE Advantech Co., Ltd.</text>`
+    )
+  },
+  {
+    id: 'brand-005',
+    name: 'SCITEK',
+    category: 'Automation & PLC',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<text x="130" y="55" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-style="italic" font-size="31" letter-spacing="1"><tspan fill="#0f172a">SCI</tspan><tspan fill="#2563eb">TEK</tspan></text>`
+    )
+  },
+  {
+    id: 'brand-006',
+    name: 'DEWALT',
+    category: 'Motion & Gearbox',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<rect x="26" y="18" width="208" height="54" rx="4" fill="#febd17"/><text x="130" y="55" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="30" letter-spacing="-0.5" fill="#111827">DEWALT</text><rect x="55" y="59" width="150" height="4" fill="#111827"/>`
+    )
+  },
+  {
+    id: 'brand-007',
+    name: 'GOTECH',
+    category: 'Motion & Gearbox',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<rect x="24" y="23" width="42" height="44" rx="4" fill="#0284c7"/><circle cx="45" cy="45" r="13" fill="none" stroke="#ffffff" stroke-width="4"/><rect x="42" y="32" width="6" height="26" fill="#ffffff"/><rect x="69" y="23" width="167" height="44" rx="4" fill="#64748b"/><text x="152" y="54" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="25" letter-spacing="1" fill="#ffffff">GOTECH</text>`
+    )
+  },
+  {
+    id: 'brand-008',
+    name: 'ahn',
+    category: 'Pneumatic & Valve',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<text x="130" y="61" text-anchor="middle" font-family="Arial,sans-serif" font-weight="500" font-size="48" letter-spacing="-1" fill="#db2777">ahn</text><text x="182" y="34" font-family="Arial,sans-serif" font-size="11" fill="#db2777">®</text>`
+    )
+  },
+  {
+    id: 'brand-009',
+    name: 'ElektroPhysik',
+    category: 'Automation & PLC',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<text x="130" y="54" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="27" letter-spacing="-0.5" fill="#475569">ElektroPhysik</text>`
+    )
+  },
+  {
+    id: 'brand-010',
+    name: 'BRADY',
+    category: 'Automation & PLC',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<rect x="30" y="27" width="38" height="36" rx="4" fill="#1e3a8a"/><circle cx="47" cy="45" r="10" fill="#ffffff"/><circle cx="47" cy="45" r="5" fill="#1e3a8a"/><text x="78" y="56" font-family="Arial,sans-serif" font-weight="900" font-size="31" letter-spacing="0.5" fill="#1e3a8a">BRADY</text>`
+    )
+  },
+  {
+    id: 'brand-011',
+    name: 'ADAM',
+    category: 'Automation & PLC',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<text x="96" y="49" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-style="italic" font-size="29" fill="#0284c7">ADAM</text><text x="96" y="62" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="7.5" letter-spacing="1.2" fill="#0284c7">SCALES &amp; BALANCES</text><line x1="168" y1="26" x2="168" y2="64" stroke="#cbd5e1" stroke-width="1.5"/><text x="176" y="39" font-family="Arial,sans-serif" font-weight="700" font-size="10.5" fill="#0f172a">Agile.</text><text x="176" y="51" font-family="Arial,sans-serif" font-weight="700" font-size="10.5" fill="#0f172a">Precise.</text><text x="176" y="63" font-family="Arial,sans-serif" font-weight="700" font-size="10.5" fill="#0284c7">Trusted.</text>`
+    )
+  },
+  {
+    id: 'brand-012',
+    name: 'QNIX',
+    category: 'Automation & PLC',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<text x="130" y="58" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="35" letter-spacing="1" fill="#00338d">QNIX</text><text x="184" y="37" font-family="Arial,sans-serif" font-size="11" fill="#0f172a">®</text>`
+    )
+  },
+  {
+    id: 'brand-013',
+    name: 'YOUNG IN Chromass',
+    category: 'Automation & PLC',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<circle cx="52" cy="30" r="5" fill="#0284c7"/><path d="M36 52 L56 34" stroke="#0284c7" stroke-width="7" stroke-linecap="round"/><path d="M40 66 L58 50" stroke="#0284c7" stroke-width="7" stroke-linecap="round"/><text x="72" y="45" font-family="Arial,sans-serif" font-weight="800" font-size="22" fill="#1e3a8a">YOUNG IN</text><text x="72" y="63" font-family="Arial,sans-serif" font-weight="700" font-size="16" fill="#0f172a">Chromass</text>`
+    )
+  },
+  {
+    id: 'brand-014',
+    name: 'Fuji',
+    category: 'Pneumatic & Valve',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<text x="130" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="39" letter-spacing="-0.5" fill="#ea580c">Fuji</text>`
+    )
+  },
+  {
+    id: 'brand-015',
+    name: 'FEELER',
+    category: 'Motion & Gearbox',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<polygon points="34,32 68,32 60,42 28,42" fill="#0d9488"/><polygon points="28,46 58,46 46,60 36,60" fill="#0d9488"/><text x="148" y="56" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-style="italic" font-size="27" fill="#0d9488">FEELER</text><text x="213" y="36" font-family="Arial,sans-serif" font-size="10" fill="#0d9488">®</text>`
+    )
+  },
+  {
+    id: 'brand-016',
+    name: 'CLIMAX',
+    category: 'Bearing & Linear',
+    status: 'Distributor Brand',
+    logoUrl: svgDataUri(
+      `<polygon points="44,30 56,39 51,54 37,54 32,39" fill="#0f172a"/><circle cx="44" cy="43" r="4" fill="#ffffff"/><text x="145" y="55" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="27" letter-spacing="1.5" fill="#111827">CLIMAX</text>`
+    )
   }
 ];
 
@@ -310,155 +632,57 @@ export const initialReviews: Review[] = [
   {
     id: 'rev-001',
     productId: 'prod-001',
-    userName: 'Budi Hartono, S.Kom',
+    userName: 'Ir. Hendrawan · Plant Maintenance',
     rating: 5,
-    date: '2 hari yang lalu',
-    title: 'Kualitas suara dan ANC melebihi ekspektasi!',
-    comment: 'Peredam suaranya (ANC) sangat mantap untuk fokus kerja di coffee shop. Bass-nya punchy tapi vokalnya jernih banget. Pengiriman kilat dan admin WhatsApp-nya sangat ramah menjelaskan garansinya.',
+    date: '3 hari yang lalu',
+    title: 'Valve SS316 presisi dan pengiriman sangat cepat',
+    comment:
+      'Unit langsung terpasang di lini bottling kami. Konsultasi spesifikasi port via WhatsApp sangat membantu sebelum PO diterbitkan.',
     isVerifiedPurchase: true,
-    helpfulCount: 24
+    helpfulCount: 14
   },
   {
     id: 'rev-002',
-    productId: 'prod-001',
-    userName: 'Jessica Anastasia',
-    rating: 5,
-    date: '5 hari yang lalu',
-    title: 'Baterai luar biasa awet, nyaman berjam-jam',
-    comment: 'Sudah saya pakai nonstop 3 hari untuk meeting Zoom dan mendengarkan Spotify masih sisa 60%. Bantalan telinganya empuk tidak bikin pusing atau panas di telinga. Sangat direkomendasikan!',
-    isVerifiedPurchase: true,
-    helpfulCount: 18
-  },
-  {
-    id: 'rev-003',
     productId: 'prod-002',
-    userName: 'Reza Pratama',
+    userName: 'PT Maju Otomasi Engineering',
     rating: 5,
     date: '1 minggu yang lalu',
-    title: 'Sakit pinggang hilang semenjak pakai kursi Titan ini',
-    comment: 'Lumbar support-nya otomatis menyesuaikan posisi punggung saat bersandar maupun tegak. Jaring punggungnya adem banget. Perakitan juga mudah hanya 15 menit. Worth every rupiah!',
-    isVerifiedPurchase: true,
-    helpfulCount: 31
-  },
-  {
-    id: 'rev-004',
-    productId: 'prod-003',
-    userName: 'Dimas Barista ID',
-    rating: 5,
-    date: '2 minggu yang lalu',
-    title: 'Grinder burr stainless-nya presisi luar biasa',
-    comment: 'Hasil gilingan kopi sangat konsisten dari coarse untuk French Press sampai fine V60. Kettle gooseneck dengan termometernya presisi banget untuk kontrol suhu 92 derajat Celsius.',
+    title: 'Torsi servo + planetary gearbox stabil tanpa backlash',
+    comment:
+      'Sudah repeat order 6 unit untuk mesin packaging klien kami. Dokumentasi teknis lengkap dan respon support cepat.',
     isVerifiedPurchase: true,
     helpfulCount: 19
-  },
-  {
-    id: 'rev-005',
-    productId: 'prod-005',
-    userName: 'Andi Nugroho, S.H.',
-    rating: 5,
-    date: '1 bulan yang lalu',
-    title: 'Tas kulit berkelas dengan aksen tenun nusantara',
-    comment: 'Bahan kulit pull up aslinya wangi khas kulit premium, jahitan sangat rapi dan kokoh. Ketika dipakai ke pengadilan atau meeting klien banyak yang memuji detail tenunnya. Bangga produk lokal!',
-    isVerifiedPurchase: true,
-    helpfulCount: 27
   }
 ];
 
 export const initialOrders: Order[] = [
   {
     id: 'ord-8801',
-    orderNumber: 'NC-202611-8801',
+    orderNumber: 'API-202611-8801',
     createdAt: '2026-11-11 14:32 WIB',
-    customerName: 'Anindya Putri',
-    customerEmail: 'anindya.putri@gmail.com',
+    customerName: 'PT Sentosa Manufaktur',
+    customerEmail: 'procurement@sentosa.co.id',
     customerPhone: '081388772211',
-    customerAddress: 'Jl. Senopati No. 45, Kebayoran Baru',
-    customerCity: 'Jakarta Selatan',
-    customerNotes: 'Tolong packing bubble wrap tebal ya min.',
+    customerAddress: 'Kawasan Industri MM2100 Blok F-4',
+    customerCity: 'Bekasi',
     items: [
       {
         productId: 'prod-001',
-        productName: 'Nusantara Apex Wireless ANC Headphone Pro',
+        productName: 'Pneumatic Solenoid Control Valve & Regulator SS316',
         price: 1850000,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80'
+        quantity: 2,
+        image: valveImg
       }
     ],
-    subtotal: 1850000,
+    subtotal: 3700000,
     shippingFee: 0,
-    discount: 185000,
-    total: 1665000,
-    paymentMethod: 'qris',
+    discount: 0,
+    total: 3700000,
+    paymentMethod: 'whatsapp',
     paymentStatus: 'paid',
     orderStatus: 'processing',
-    courier: 'JNE YES (Next Day)',
-    trackingNumber: 'JNE88291044910',
-    paidAt: '2026-11-11 14:33:12 WIB'
-  },
-  {
-    id: 'ord-8802',
-    orderNumber: 'NC-202611-8802',
-    createdAt: '2026-11-11 11:15 WIB',
-    customerName: 'Hendrawan Pratama',
-    customerEmail: 'hendra.pratama@perusahaan.co.id',
-    customerPhone: '081299884433',
-    customerAddress: 'Ruko Golden Boulevard Blok C No. 12, BSD City',
-    customerCity: 'Tangerang Selatan',
-    items: [
-      {
-        productId: 'prod-002',
-        productName: 'Smart Ergonomic Office Chair Nusantara Titan',
-        price: 3250000,
-        quantity: 2,
-        image: 'https://images.unsplash.com/photo-1580481077195-c322b724db68?auto=format&fit=crop&w=400&q=80'
-      }
-    ],
-    subtotal: 6500000,
-    shippingFee: 50000,
-    discount: 500000,
-    total: 6050000,
-    paymentMethod: 'virtual_account',
-    paymentStatus: 'paid',
-    orderStatus: 'shipped',
-    courier: 'SiCepat Cargo',
-    trackingNumber: 'SCP9900123849',
-    paidAt: '2026-11-11 11:20:05 WIB'
-  },
-  {
-    id: 'ord-8803',
-    orderNumber: 'NC-202611-8803',
-    createdAt: '2026-11-10 16:40 WIB',
-    customerName: 'Dewi Lestari',
-    customerEmail: 'dewi.lestari@yahoo.co.id',
-    customerPhone: '085711223344',
-    customerAddress: 'Jl. Dago Asri No. 8',
-    customerCity: 'Bandung',
-    items: [
-      {
-        productId: 'prod-003',
-        productName: 'Artisan Pour-Over Drip Coffee Maker Set & Grinder',
-        price: 890000,
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=400&q=80'
-      },
-      {
-        productId: 'prod-007',
-        productName: 'Biji Kopi Specialty Nusantara Single Origin Gayo & Toraja',
-        price: 245000,
-        quantity: 2,
-        image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=400&q=80'
-      }
-    ],
-    subtotal: 1380000,
-    shippingFee: 25000,
-    discount: 100000,
-    total: 1305000,
-    paymentMethod: 'credit_card',
-    paymentStatus: 'paid',
-    orderStatus: 'completed',
-    courier: 'J&T Express',
-    trackingNumber: 'JT8817294401',
-    paidAt: '2026-11-10 16:42:50 WIB'
+    courier: 'Kurir Perusahaan / Ekspedisi Darat',
+    trackingNumber: 'API-DO-8801'
   }
 ];
 

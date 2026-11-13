@@ -9,13 +9,11 @@ import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { AboutCompanySection, CompanyKnowledgeModal } from './components/AboutCompany';
 import { CatalogSection } from './components/CatalogSection';
+import { ECatalogSection } from './components/ECatalogSection';
+import { PartnershipSection } from './components/PartnershipSection';
 import { WhatsAppContactSection, FloatingWhatsAppButton } from './components/WhatsAppContactSection';
 import { Footer } from './components/Footer';
 import { ProductDetailModal } from './components/ProductDetailModal';
-import { CartDrawer } from './components/CartDrawer';
-import { CheckoutPaymentModal } from './components/CheckoutPaymentModal';
-import { AuthModal } from './components/AuthModal';
-import { CustomerOrdersModal } from './components/CustomerOrdersModal';
 import { AdminDashboard } from './components/AdminDashboard';
 
 const AppContent: React.FC = () => {
@@ -26,37 +24,39 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-emerald-500 selection:text-white">
-      {/* Navigation Bar with Search, Language Switcher, Cart Badge */}
+    <div className="min-h-screen flex flex-col bg-white text-slate-900 selection:bg-blue-700 selection:text-white">
+      {/* Corporate Single-Row Top Bar */}
       <Navbar />
 
-      {/* Main Content Sections */}
+      {/* Main Corporate Sections */}
       <main className="flex-1">
-        {/* Hero Banner with Brand Tagline & Quick WhatsApp CTAs */}
+        {/* Hero Corporate Introduction */}
         <HeroSection />
 
-        {/* Catalog Section with Category Filters, Search, and Tech Specs */}
-        <CatalogSection />
-
-        {/* Company Knowledge / Profile / About Me / Founder Story */}
+        {/* 1. Perkenalan PT Asiaparts Indotech / About Us */}
         <AboutCompanySection />
 
-        {/* Dedicated WhatsApp Contact Section with Form & Live Message Preview */}
+        {/* 2 & 3. Display Barang + Detail Spesifikasi + Tanya/Beli via WhatsApp */}
+        <CatalogSection />
+
+        {/* 4. Fitur E-Catalog */}
+        <ECatalogSection />
+
+        {/* 5. Menu / Fitur Partnership & Support Ship */}
+        <PartnershipSection />
+
+        {/* 6. Contact Us di Bagian Bawah Website */}
         <WhatsAppContactSection />
       </main>
 
-      {/* Global Footer */}
+      {/* Corporate Footer */}
       <Footer />
 
-      {/* Floating Quick WhatsApp Launcher */}
+      {/* Floating Quick WhatsApp Sales Launcher */}
       <FloatingWhatsAppButton />
 
-      {/* Modals & Slide-overs */}
+      {/* Detail Produk & Spesifikasi + Profil Perusahaan Modals */}
       <ProductDetailModal />
-      <CartDrawer />
-      <CheckoutPaymentModal />
-      <AuthModal />
-      <CustomerOrdersModal />
       <CompanyKnowledgeModal />
     </div>
   );
