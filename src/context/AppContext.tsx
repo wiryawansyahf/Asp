@@ -262,8 +262,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Route Detection (/admin vs /)
   const checkIsAdminRoute = () => {
-    const cleanPath = window.location.pathname.replace(/\/+$/, '');
-    return cleanPath === '/admin' || cleanPath.endsWith('/admin') || window.location.hash === '#/admin';
+    const cleanPath = window.location.pathname.replace(/\/+$/, '').toLowerCase();
+    const params = new URLSearchParams(window.location.search);
+    return (
+      cleanPath === '/admin' ||
+      cleanPath.endsWith('/admin') ||
+      cleanPath.endsWith('/admin.html') ||
+      window.location.hash === '#/admin' ||
+      params.has('admin') ||
+      params.get('page') === 'admin'
+    );
   };
 
   const [isAdminRoute, setIsAdminRoute] = useState<boolean>(checkIsAdminRoute);

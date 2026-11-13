@@ -1,11 +1,28 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import fs from 'fs';
 import path from 'path';
-import {defineConfig} from 'vite';
+import {defineConfig, Plugin} from 'vite';
+
+function spaAdminFallbackPlugin(): Plugin {
+  return {
+    name: 'spa-admin-fallback',
+    closeBundle() {
+      const distDir = path.resolve(__dirname, 'dist');
+      const indexHtml = path.join(distDir, 'index.html');
+      if (fs.existsSync(indexHtml)) {
+        const adminDir = path.join(distDir, 'admin');
+        fs.mkdirSync(adminDir, {recursive: true});
+        fs.copyFileSync(indexHtml, path.join(adminDir, 'index.html'));
+        fs.copyFileSync(indexHtml, path.join(distDir, 'admin.html'));
+      }
+    },
+  };
+}
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), spaAdminFallbackPlugin()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
