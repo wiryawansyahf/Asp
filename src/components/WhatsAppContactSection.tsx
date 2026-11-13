@@ -6,7 +6,8 @@ import {
   CheckCircle2, 
   Sparkles, 
   Headphones, 
-  ArrowUpRight 
+  ArrowUpRight,
+  Pencil
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -15,7 +16,10 @@ export const WhatsAppContactSection: React.FC = () => {
     t, 
     companySettings, 
     formatWhatsAppUrl, 
-    products 
+    products,
+    isAdmin,
+    isInlineEditMode,
+    openAdminTab
   } = useApp();
 
   const [senderName, setSenderName] = useState('');
@@ -95,7 +99,18 @@ Mohon respon dan informasinya. Terima kasih!`;
 
               {/* Official WhatsApp number display */}
               <div className="space-y-1">
-                <span className="text-xs text-slate-400">Nomor WhatsApp Resmi:</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-400">Nomor WhatsApp Resmi:</span>
+                  {isAdmin && isInlineEditMode && (
+                    <button
+                      onClick={() => openAdminTab('header_wa')}
+                      className="px-2 py-0.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-bold inline-flex items-center gap-1 transition"
+                    >
+                      <Pencil className="w-2.5 h-2.5" />
+                      <span>Edit No. WA</span>
+                    </button>
+                  )}
+                </div>
                 <p className="font-mono text-lg font-bold text-emerald-300">
                   +{companySettings.whatsappNumber}
                 </p>

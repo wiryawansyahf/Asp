@@ -101,6 +101,16 @@ export interface User {
 
 export interface CompanySettings {
   companyName: string;
+  logoText: string;
+  logoUrl?: string;
+  headerTitle: string;
+  headerTitleHighlight: string;
+  headerSubtitle: string;
+  showWhatsAppInHeader: boolean;
+  heroBadge: string;
+  heroTitlePrefix: string;
+  heroTitleHighlight: string;
+  heroDescription: string;
   tagline: string;
   taglineEn: string;
   aboutStory: string;
@@ -114,6 +124,7 @@ export interface CompanySettings {
   founderBio: string;
   founderAvatar: string;
   whatsappNumber: string; // e.g. "6281234567890"
+  whatsappDefaultMessage: string;
   email: string;
   phone: string;
   address: string;
@@ -123,6 +134,7 @@ export interface CompanySettings {
   socialLinkedIn: string;
   announcementText: string;
   announcementTextEn: string;
+  announcementCtaText: string;
   isAnnouncementActive: boolean;
 }
 

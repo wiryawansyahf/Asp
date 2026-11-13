@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
     t, 
     companySettings, 
     setIsCompanyModalOpen, 
-    setIsAdminOpen, 
+    openAdminAccess, 
     formatWhatsAppUrl 
   } = useApp();
 
@@ -31,9 +31,17 @@ export const Footer: React.FC = () => {
           {/* Brand Info & Mission */}
           <div className="lg:col-span-5 space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center font-bold text-white shadow-md text-xl">
-                N
-              </div>
+              {companySettings.logoUrl ? (
+                <img
+                  src={companySettings.logoUrl}
+                  alt={companySettings.companyName}
+                  className="w-10 h-10 rounded-xl object-cover shadow-md"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center font-bold text-white shadow-md text-xl">
+                  {companySettings.logoText || 'N'}
+                </div>
+              )}
               <span className="text-xl font-extrabold text-white font-heading">
                 {companySettings.companyName}
               </span>
@@ -86,7 +94,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <button
-                  onClick={() => setIsAdminOpen(true)}
+                  onClick={openAdminAccess}
                   className="text-emerald-400 hover:text-emerald-300 transition text-left font-semibold"
                 >
                   {t.navAdmin} & CMS

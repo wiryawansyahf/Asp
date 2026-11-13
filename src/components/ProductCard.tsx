@@ -7,7 +7,9 @@ import {
   Check, 
   Flame, 
   Sparkles,
-  Percent
+  Percent,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import { Product } from '../types';
 import { useApp } from '../context/AppContext';
@@ -22,7 +24,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     t, 
     openProductDetail, 
     addToCart, 
-    createWhatsAppProductInquiryUrl 
+    createWhatsAppProductInquiryUrl,
+    isAdmin,
+    isInlineEditMode,
+    openProductEditor,
+    deleteProduct
   } = useApp();
 
   const [isAddedRecently, setIsAddedRecently] = React.useState(false);
@@ -85,14 +91,43 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         )}
 
+        {/* Admin Inline Quick Edit/Delete Bar */}
+        {isAdmin && isInlineEditMode && (
+          <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center gap-1.5">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                openProductEditor(product);
+              }}
+              className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-[11px] shadow-md flex items-center gap-1 transition"
+              title="Edit Produk Ini"
+            >
+              <Pencil className="w-3 h-3" />
+              <span>Edit</span>
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (confirm(`Hapus produk "${product.name}" dari katalog?`)) {
+                  deleteProduct(product.id);
+                }
+              }}
+              className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-md transition"
+              title="Hapus Produk Ini"
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
+        )}
+
         {/* Quick View Overlay on Desktop Hover */}
-        <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4 pointer-events-none">
           <button
             onClick={(e) => {
               e.stopPropagation();
               openProductDetail(product);
             }}
-            className="px-4 py-2 rounded-xl bg-white/95 text-slate-900 font-semibold text-xs shadow-lg backdrop-blur-xs flex items-center gap-1.5 hover:bg-white hover:scale-105 transition-all"
+            className="pointer-events-auto px-4 py-2 rounded-xl bg-white/95 text-slate-900 font-semibold text-xs shadow-lg backdrop-blur-xs flex items-center gap-1.5 hover:bg-white hover:scale-105 transition-all"
           >
             <Eye className="w-3.5 h-3.5 text-emerald-600" />
             <span>{t.viewDetails}</span>

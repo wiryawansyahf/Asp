@@ -8,7 +8,8 @@ import {
   QrCode, 
   Star, 
   Award,
-  CheckCircle2
+  CheckCircle2,
+  Pencil
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -20,7 +21,10 @@ export const HeroSection: React.FC = () => {
     formatWhatsAppUrl, 
     products, 
     openProductDetail,
-    setSelectedCategory 
+    setSelectedCategory,
+    isAdmin,
+    isInlineEditMode,
+    openAdminTab
   } = useApp();
 
   const featuredProduct = products.find((p) => p.featured) || products[0];
@@ -51,23 +55,36 @@ export const HeroSection: React.FC = () => {
           {/* Left Column: Headlines & CTAs */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             
-            {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold backdrop-blur-xs">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{t.heroBadge}</span>
+            {/* Pill Badge + Inline Admin Edit Button */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold backdrop-blur-xs">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{language === 'id' ? (companySettings.heroBadge || t.heroBadge) : t.heroBadge}</span>
+              </div>
+
+              {isAdmin && isInlineEditMode && (
+                <button
+                  onClick={() => openAdminTab('header_wa')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold shadow-md transition"
+                >
+                  <Pencil className="w-3 h-3" />
+                  <span>Edit Hero & Header</span>
+                </button>
+              )}
             </div>
 
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
-              {t.heroTitlePrefix}{' '}
+              {language === 'id' ? (companySettings.heroTitlePrefix || t.heroTitlePrefix) : t.heroTitlePrefix}{' '}
               <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 bg-clip-text text-transparent">
-                {t.heroTitleHighlight}
+                {language === 'id' ? (companySettings.heroTitleHighlight || t.heroTitleHighlight) : t.heroTitleHighlight}
               </span>
             </h1>
 
             {/* Tagline / Subtitle */}
             <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
-              {language === 'id' ? companySettings.tagline : companySettings.taglineEn}. {t.heroDescription}
+              {language === 'id' ? companySettings.tagline : companySettings.taglineEn}.{' '}
+              {language === 'id' ? (companySettings.heroDescription || t.heroDescription) : t.heroDescription}
             </p>
 
             {/* Action Buttons */}
@@ -139,6 +156,7 @@ export const HeroSection: React.FC = () => {
           </div>
 
           {/* Right Column: Interactive Featured Product Card Preview */}
+          {featuredProduct && (
           <div className="lg:col-span-5 relative">
             <div className="relative mx-auto max-w-md bg-gradient-to-br from-slate-800/90 to-slate-900/95 border border-slate-700/80 rounded-3xl p-5 shadow-2xl backdrop-blur-xl group hover:border-emerald-500/50 transition-all duration-300">
               
@@ -150,9 +168,11 @@ export const HeroSection: React.FC = () => {
                     Produk Paling Direkomendasikan
                   </span>
                 </div>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
-                  Hemat {featuredProduct.discountPercentage}%
-                </span>
+                {featuredProduct.discountPercentage && featuredProduct.discountPercentage > 0 ? (
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
+                    Hemat {featuredProduct.discountPercentage}%
+                  </span>
+                ) : null}
               </div>
 
               {/* Product Image with Hover Zoom */}
@@ -242,6 +262,7 @@ export const HeroSection: React.FC = () => {
 
             </div>
           </div>
+          )}
 
         </div>
       </div>

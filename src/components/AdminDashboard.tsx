@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   BarChart3, 
@@ -13,24 +13,28 @@ import {
   AlertTriangle, 
   TrendingUp, 
   DollarSign, 
-  Users, 
   Clock, 
-  Truck, 
   Save, 
   MessageCircle,
-  Eye,
-  Filter,
-  Check,
   Search,
-  ExternalLink
+  ExternalLink,
+  LayoutTemplate,
+  PhoneCall,
+  Image as ImageIcon,
+  ListChecks,
+  Sparkles
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { Product, Order, OrderStatus } from '../types';
+import { Product, OrderStatus } from '../types';
 
 export const AdminDashboard: React.FC = () => {
   const { 
     isAdminOpen, 
     setIsAdminOpen, 
+    adminActiveTab,
+    setAdminActiveTab,
+    directEditProduct,
+    setDirectEditProduct,
     products, 
     addProduct, 
     updateProduct, 
@@ -44,23 +48,25 @@ export const AdminDashboard: React.FC = () => {
     formatWhatsAppUrl
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'orders' | 'settings' | 'reviews'>('analytics');
-
   // Product Add / Edit Modal
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [productSearch, setProductSearch] = useState('');
 
   // Product Form State
   const [prodName, setProdName] = useState('');
+  const [prodNameEn, setProdNameEn] = useState('');
   const [prodCategory, setProdCategory] = useState('Elektronik & Gadget');
+  const [prodCustomCategory, setProdCustomCategory] = useState('');
   const [prodPrice, setProdPrice] = useState(0);
   const [prodOriginalPrice, setProdOriginalPrice] = useState(0);
   const [prodStock, setProdStock] = useState(10);
   const [prodSku, setProdSku] = useState('');
-  const [prodImage, setProdImage] = useState('');
+  const [prodImages, setProdImages] = useState<string[]>(['']);
   const [prodDesc, setProdDesc] = useState('');
   const [prodFeatured, setProdFeatured] = useState(false);
   const [prodBestSeller, setProdBestSeller] = useState(false);
+  const [prodIsNew, setProdIsNew] = useState(true);
   const [prodSpecs, setProdSpecs] = useState<{ label: string; value: string }[]>([
     { label: 'Garansi', value: '1 Tahun Resmi' },
     { label: 'Kondisi', value: 'Baru 100% Original' }
@@ -70,18 +76,123 @@ export const AdminDashboard: React.FC = () => {
   const [orderFilter, setOrderFilter] = useState<string>('all');
   const [orderSearch, setOrderSearch] = useState('');
 
-  // Settings Form State
+  // Header, Hero & WhatsApp Form State
+  const [logoText, setLogoText] = useState(companySettings.logoText || 'N');
+  const [logoUrl, setLogoUrl] = useState(companySettings.logoUrl || '');
+  const [headerTitle, setHeaderTitle] = useState(companySettings.headerTitle || 'Nusantara');
+  const [headerTitleHighlight, setHeaderTitleHighlight] = useState(companySettings.headerTitleHighlight || 'Catalog');
+  const [headerSubtitle, setHeaderSubtitle] = useState(companySettings.headerSubtitle || 'Official Store & Innovations');
+  const [showWhatsAppInHeader, setShowWhatsAppInHeader] = useState(companySettings.showWhatsAppInHeader);
+  const [heroBadge, setHeroBadge] = useState(companySettings.heroBadge || '');
+  const [heroTitlePrefix, setHeroTitlePrefix] = useState(companySettings.heroTitlePrefix || '');
+  const [heroTitleHighlight, setHeroTitleHighlight] = useState(companySettings.heroTitleHighlight || '');
+  const [heroDescription, setHeroDescription] = useState(companySettings.heroDescription || '');
+  const [compWa, setCompWa] = useState(companySettings.whatsappNumber);
+  const [waDefaultMsg, setWaDefaultMsg] = useState(companySettings.whatsappDefaultMessage || '');
+  const [compAnnouncement, setCompAnnouncement] = useState(companySettings.announcementText);
+  const [announcementCtaText, setAnnouncementCtaText] = useState(companySettings.announcementCtaText || 'Klaim Promo');
+  const [compAnnouncementActive, setCompAnnouncementActive] = useState(companySettings.isAnnouncementActive);
+  const [headerSaved, setHeaderSaved] = useState(false);
+
+  // Company Settings Form State
   const [compName, setCompName] = useState(companySettings.companyName);
   const [compTagline, setCompTagline] = useState(companySettings.tagline);
   const [compStory, setCompStory] = useState(companySettings.aboutStory);
   const [compVision, setCompVision] = useState(companySettings.vision);
-  const [compWa, setCompWa] = useState(companySettings.whatsappNumber);
   const [compEmail, setCompEmail] = useState(companySettings.email);
+  const [compPhone, setCompPhone] = useState(companySettings.phone);
   const [compAddress, setCompAddress] = useState(companySettings.address);
   const [compFounderName, setCompFounderName] = useState(companySettings.founderName);
-  const [compAnnouncement, setCompAnnouncement] = useState(companySettings.announcementText);
-  const [compAnnouncementActive, setCompAnnouncementActive] = useState(companySettings.isAnnouncementActive);
   const [settingsSaved, setSettingsSaved] = useState(false);
+
+  // Keep local form states synchronized with companySettings
+  useEffect(() => {
+    setLogoText(companySettings.logoText || 'N');
+    setLogoUrl(companySettings.logoUrl || '');
+    setHeaderTitle(companySettings.headerTitle || 'Nusantara');
+    setHeaderTitleHighlight(companySettings.headerTitleHighlight || 'Catalog');
+    setHeaderSubtitle(companySettings.headerSubtitle || 'Official Store & Innovations');
+    setShowWhatsAppInHeader(companySettings.showWhatsAppInHeader);
+    setHeroBadge(companySettings.heroBadge || '');
+    setHeroTitlePrefix(companySettings.heroTitlePrefix || '');
+    setHeroTitleHighlight(companySettings.heroTitleHighlight || '');
+    setHeroDescription(companySettings.heroDescription || '');
+    setCompWa(companySettings.whatsappNumber);
+    setWaDefaultMsg(companySettings.whatsappDefaultMessage || '');
+    setCompAnnouncement(companySettings.announcementText);
+    setAnnouncementCtaText(companySettings.announcementCtaText || 'Klaim Promo');
+    setCompAnnouncementActive(companySettings.isAnnouncementActive);
+
+    setCompName(companySettings.companyName);
+    setCompTagline(companySettings.tagline);
+    setCompStory(companySettings.aboutStory);
+    setCompVision(companySettings.vision);
+    setCompEmail(companySettings.email);
+    setCompPhone(companySettings.phone);
+    setCompAddress(companySettings.address);
+    setCompFounderName(companySettings.founderName);
+  }, [companySettings, isAdminOpen]);
+
+  // Open Edit Product helper
+  const handleOpenEdit = (p: Product) => {
+    setEditingProduct(p);
+    setProdName(p.name);
+    setProdNameEn(p.nameEn || '');
+    const presetCategories = ['Elektronik & Gadget', 'Home & Living', 'Kopi & F&B Nusantara', 'Fashion & Apparel', 'Aksesoris'];
+    if (presetCategories.includes(p.category)) {
+      setProdCategory(p.category);
+      setProdCustomCategory('');
+    } else {
+      setProdCategory('__custom__');
+      setProdCustomCategory(p.category);
+    }
+    setProdPrice(p.price);
+    setProdOriginalPrice(p.originalPrice || p.price);
+    setProdStock(p.stock);
+    setProdSku(p.sku);
+    setProdImages(p.images.length > 0 ? p.images : ['']);
+    setProdDesc(p.description);
+    setProdFeatured(p.featured);
+    setProdBestSeller(p.bestSeller || false);
+    setProdIsNew(p.isNew || false);
+    setProdSpecs(p.specifications.length > 0 ? p.specifications : [{ label: 'Garansi', value: '1 Tahun' }]);
+    setIsProductModalOpen(true);
+  };
+
+  // Open Add Product helper
+  const handleOpenAdd = () => {
+    setEditingProduct(null);
+    setProdName('');
+    setProdNameEn('');
+    setProdCategory('Elektronik & Gadget');
+    setProdCustomCategory('');
+    setProdPrice(500000);
+    setProdOriginalPrice(650000);
+    setProdStock(25);
+    setProdSku(`NC-${Date.now().toString().slice(-4)}`);
+    setProdImages(['https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80']);
+    setProdDesc('');
+    setProdFeatured(false);
+    setProdBestSeller(false);
+    setProdIsNew(true);
+    setProdSpecs([
+      { label: 'Garansi', value: '1 Tahun Resmi Toko' },
+      { label: 'Kondisi', value: '100% Baru & Segel' }
+    ]);
+    setIsProductModalOpen(true);
+  };
+
+  // Handle direct product edit trigger from Storefront cards
+  useEffect(() => {
+    if (isAdminOpen && directEditProduct) {
+      if (directEditProduct === 'new') {
+        handleOpenAdd();
+      } else {
+        handleOpenEdit(directEditProduct);
+      }
+      setDirectEditProduct(null);
+    }
+  }, [isAdminOpen, directEditProduct]);
 
   if (!isAdminOpen) return null;
 
@@ -93,50 +204,22 @@ export const AdminDashboard: React.FC = () => {
   const totalOrdersCount = orders.length;
   const avgOrderValue = totalOrdersCount > 0 ? Math.round(totalRevenue / totalOrdersCount) : 0;
   const lowStockCount = products.filter((p) => p.stock <= 15).length;
-
-  // Max revenue for bar chart scaling
   const maxMetricRevenue = Math.max(...dailyMetrics.map((m) => m.revenue), 12000000);
-
-  // Open Edit Product
-  const handleOpenEdit = (p: Product) => {
-    setEditingProduct(p);
-    setProdName(p.name);
-    setProdCategory(p.category);
-    setProdPrice(p.price);
-    setProdOriginalPrice(p.originalPrice || p.price);
-    setProdStock(p.stock);
-    setProdSku(p.sku);
-    setProdImage(p.images[0] || '');
-    setProdDesc(p.description);
-    setProdFeatured(p.featured);
-    setProdBestSeller(p.bestSeller || false);
-    setProdSpecs(p.specifications.length > 0 ? p.specifications : [{ label: 'Garansi', value: '1 Tahun' }]);
-    setIsProductModalOpen(true);
-  };
-
-  // Open Add Product
-  const handleOpenAdd = () => {
-    setEditingProduct(null);
-    setProdName('');
-    setProdCategory('Elektronik & Gadget');
-    setProdPrice(500000);
-    setProdOriginalPrice(650000);
-    setProdStock(25);
-    setProdSku(`NC-${Date.now().toString().slice(-4)}`);
-    setProdImage('https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80');
-    setProdDesc('');
-    setProdFeatured(false);
-    setProdBestSeller(false);
-    setProdSpecs([
-      { label: 'Garansi', value: '1 Tahun Resmi Toko' },
-      { label: 'Kondisi', value: '100% Baru & Segel' }
-    ]);
-    setIsProductModalOpen(true);
-  };
 
   const handleSaveProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (!prodName.trim() || prodPrice <= 0) return;
+
+    const finalCategory = prodCategory === '__custom__'
+      ? (prodCustomCategory.trim() || 'Lainnya')
+      : prodCategory;
+
+    const cleanImages = prodImages.map((img) => img.trim()).filter(Boolean);
+    if (cleanImages.length === 0) {
+      cleanImages.push('https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80');
+    }
+
+    const cleanSpecs = prodSpecs.filter((s) => s.label.trim() && s.value.trim());
 
     const discount = prodOriginalPrice > prodPrice 
       ? Math.round(((prodOriginalPrice - prodPrice) / prodOriginalPrice) * 100) 
@@ -145,39 +228,67 @@ export const AdminDashboard: React.FC = () => {
     if (editingProduct) {
       updateProduct({
         ...editingProduct,
-        name: prodName,
-        category: prodCategory,
+        name: prodName.trim(),
+        nameEn: prodNameEn.trim() || undefined,
+        category: finalCategory,
         price: prodPrice,
         originalPrice: prodOriginalPrice,
         discountPercentage: discount,
         stock: prodStock,
-        sku: prodSku,
-        images: [prodImage, ...editingProduct.images.slice(1)],
-        description: prodDesc,
+        sku: prodSku.trim(),
+        images: cleanImages,
+        description: prodDesc.trim(),
         featured: prodFeatured,
         bestSeller: prodBestSeller,
-        specifications: prodSpecs
+        isNew: prodIsNew,
+        specifications: cleanSpecs
       });
     } else {
       addProduct({
-        name: prodName,
-        category: prodCategory,
+        name: prodName.trim(),
+        nameEn: prodNameEn.trim() || undefined,
+        category: finalCategory,
         price: prodPrice,
         originalPrice: prodOriginalPrice,
         discountPercentage: discount,
         stock: prodStock,
-        sku: prodSku,
-        images: [prodImage],
-        description: prodDesc,
+        sku: prodSku.trim(),
+        images: cleanImages,
+        description: prodDesc.trim(),
         featured: prodFeatured,
         bestSeller: prodBestSeller,
-        isNew: true,
-        specifications: prodSpecs,
-        tags: [prodCategory.split(' ')[0]]
+        isNew: prodIsNew,
+        specifications: cleanSpecs,
+        tags: [finalCategory.split(' ')[0]]
       });
     }
 
     setIsProductModalOpen(false);
+  };
+
+  const handleSaveHeaderAndWa = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanedWa = compWa.replace(/[^0-9]/g, '');
+    updateCompanySettings({
+      logoText: logoText.trim() || 'N',
+      logoUrl: logoUrl.trim(),
+      headerTitle: headerTitle.trim() || 'Nusantara',
+      headerTitleHighlight: headerTitleHighlight.trim() || 'Catalog',
+      headerSubtitle: headerSubtitle.trim(),
+      showWhatsAppInHeader,
+      heroBadge: heroBadge.trim(),
+      heroTitlePrefix: heroTitlePrefix.trim(),
+      heroTitleHighlight: heroTitleHighlight.trim(),
+      heroDescription: heroDescription.trim(),
+      whatsappNumber: cleanedWa || '6281234567890',
+      whatsappDefaultMessage: waDefaultMsg.trim(),
+      announcementText: compAnnouncement.trim(),
+      announcementCtaText: announcementCtaText.trim() || 'Klaim Promo',
+      isAnnouncementActive: compAnnouncementActive
+    });
+    setCompWa(cleanedWa || '6281234567890');
+    setHeaderSaved(true);
+    setTimeout(() => setHeaderSaved(false), 2500);
   };
 
   const handleSaveSettings = (e: React.FormEvent) => {
@@ -187,16 +298,25 @@ export const AdminDashboard: React.FC = () => {
       tagline: compTagline,
       aboutStory: compStory,
       vision: compVision,
-      whatsappNumber: compWa,
       email: compEmail,
+      phone: compPhone,
       address: compAddress,
-      founderName: compFounderName,
-      announcementText: compAnnouncement,
-      isAnnouncementActive: compAnnouncementActive
+      founderName: compFounderName
     });
     setSettingsSaved(true);
-    setTimeout(() => setSettingsSaved(false), 2000);
+    setTimeout(() => setSettingsSaved(false), 2500);
   };
+
+  // Filter Products in Admin Table
+  const filteredAdminProducts = products.filter((p) => {
+    if (!productSearch.trim()) return true;
+    const q = productSearch.toLowerCase();
+    return (
+      p.name.toLowerCase().includes(q) ||
+      p.sku.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q)
+    );
+  });
 
   // Filter Orders
   const filteredOrders = orders.filter((o) => {
@@ -225,14 +345,14 @@ export const AdminDashboard: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-extrabold text-white text-base sm:text-lg">
-                  Dashboard Admin & CMS Website
+                  Dashboard Admin & Editor Website
                 </h3>
                 <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
-                  Live System
+                  Live CMS
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Kontrol katalog produk, pesanan baru, laporan penjualan harian & profil website
+                Edit Header, Nomor WhatsApp, Katalog Produk, Laporan Penjualan Harian & Profil Perusahaan
               </p>
             </div>
           </div>
@@ -248,33 +368,45 @@ export const AdminDashboard: React.FC = () => {
         {/* Navigation Tabs Bar */}
         <div className="flex items-center border-b border-slate-200 bg-slate-50 px-4 sm:px-6 overflow-x-auto shrink-0 scrollbar-none text-xs sm:text-sm font-bold">
           <button
-            onClick={() => setActiveTab('analytics')}
+            onClick={() => setAdminActiveTab('analytics')}
             className={`py-3.5 px-3 flex items-center gap-2 border-b-2 transition whitespace-nowrap ${
-              activeTab === 'analytics'
+              adminActiveTab === 'analytics'
                 ? 'border-emerald-600 text-emerald-700 bg-white'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
             <BarChart3 className="w-4 h-4 text-emerald-600" />
-            <span>Analitik Penjualan Harian</span>
+            <span>Analitik Penjualan</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('products')}
+            onClick={() => setAdminActiveTab('header_wa')}
             className={`py-3.5 px-3 flex items-center gap-2 border-b-2 transition whitespace-nowrap ${
-              activeTab === 'products'
+              adminActiveTab === 'header_wa'
+                ? 'border-emerald-600 text-emerald-700 bg-white'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <LayoutTemplate className="w-4 h-4 text-amber-600" />
+            <span>Edit Header, Hero & No. WA</span>
+          </button>
+
+          <button
+            onClick={() => setAdminActiveTab('products')}
+            className={`py-3.5 px-3 flex items-center gap-2 border-b-2 transition whitespace-nowrap ${
+              adminActiveTab === 'products'
                 ? 'border-emerald-600 text-emerald-700 bg-white'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
             <Package className="w-4 h-4 text-blue-600" />
-            <span>Katalog Produk ({products.length})</span>
+            <span>Edit Produk ({products.length})</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('orders')}
+            onClick={() => setAdminActiveTab('orders')}
             className={`py-3.5 px-3 flex items-center gap-2 border-b-2 transition whitespace-nowrap ${
-              activeTab === 'orders'
+              adminActiveTab === 'orders'
                 ? 'border-emerald-600 text-emerald-700 bg-white'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
@@ -284,27 +416,27 @@ export const AdminDashboard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('settings')}
+            onClick={() => setAdminActiveTab('settings')}
             className={`py-3.5 px-3 flex items-center gap-2 border-b-2 transition whitespace-nowrap ${
-              activeTab === 'settings'
+              adminActiveTab === 'settings'
                 ? 'border-emerald-600 text-emerald-700 bg-white'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
             <Settings className="w-4 h-4 text-slate-600" />
-            <span>Edit Profile & Website</span>
+            <span>Edit Profil Perusahaan</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('reviews')}
+            onClick={() => setAdminActiveTab('reviews')}
             className={`py-3.5 px-3 flex items-center gap-2 border-b-2 transition whitespace-nowrap ${
-              activeTab === 'reviews'
+              adminActiveTab === 'reviews'
                 ? 'border-emerald-600 text-emerald-700 bg-white'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
             <Star className="w-4 h-4 text-amber-500" />
-            <span>Ulasan Pelanggan ({reviews.length})</span>
+            <span>Ulasan ({reviews.length})</span>
           </button>
         </div>
 
@@ -314,9 +446,39 @@ export const AdminDashboard: React.FC = () => {
           {/* ========================================================
               TAB 1: ANALYTICS
              ======================================================== */}
-          {activeTab === 'analytics' && (
+          {adminActiveTab === 'analytics' && (
             <div className="space-y-6">
               
+              {/* Quick Edit Shortcuts Banner */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900 to-emerald-950 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+                <div>
+                  <h4 className="font-bold text-sm flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                    <span>Pintasan Edit Website Cepat</span>
+                  </h4>
+                  <p className="text-xs text-slate-300">
+                    Ubah tampilan header, nomor WhatsApp tujuan, atau tambah barang baru dalam 1 klik.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setAdminActiveTab('header_wa')}
+                    className="px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold transition"
+                  >
+                    Edit Header & No. WA
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAdminActiveTab('products');
+                      handleOpenAdd();
+                    }}
+                    className="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold transition"
+                  >
+                    + Tambah Produk
+                  </button>
+                </div>
+              </div>
+
               {/* Top Metric Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-1">
@@ -388,25 +550,19 @@ export const AdminDashboard: React.FC = () => {
                   </span>
                 </div>
 
-                {/* Simulated SVG / CSS Bar Chart */}
                 <div className="pt-6">
                   <div className="h-48 flex items-end justify-between gap-2 sm:gap-6 border-b border-slate-200 pb-2">
                     {dailyMetrics.map((item, idx) => {
                       const heightPercent = Math.min(100, Math.round((item.revenue / maxMetricRevenue) * 100));
                       return (
                         <div key={idx} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
-                          {/* Tooltip on hover */}
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] bg-slate-900 text-white px-2 py-1 rounded whitespace-nowrap pointer-events-none mb-1 shadow-md">
                             Rp {(item.revenue / 1000000).toFixed(1)} Jt ({item.orderCount} order)
                           </div>
-                          
-                          {/* Bar */}
                           <div
                             style={{ height: `${heightPercent}%` }}
                             className="w-full max-w-[42px] bg-gradient-to-t from-emerald-600 to-teal-400 rounded-t-xl group-hover:brightness-110 transition-all shadow-xs"
                           />
-                          
-                          {/* Label */}
                           <span className="text-[11px] font-semibold text-slate-600 truncate">
                             {item.date}
                           </span>
@@ -419,8 +575,6 @@ export const AdminDashboard: React.FC = () => {
 
               {/* Bottom Row: Top Products & Recent Activity */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                {/* Top Selling Products */}
                 <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
                   <h4 className="font-bold text-sm text-slate-900">Produk Paling Banyak Terjual</h4>
                   <div className="space-y-3">
@@ -438,7 +592,6 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Real-time Order Stream */}
                 <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-bold text-sm text-slate-900">Aliran Transaksi Terkini</h4>
@@ -463,30 +616,346 @@ export const AdminDashboard: React.FC = () => {
                     ))}
                   </div>
                 </div>
-
               </div>
 
             </div>
           )}
 
           {/* ========================================================
-              TAB 2: PRODUCTS CMS
+              TAB 2: EDIT HEADER, HERO & NOMOR WHATSAPP
              ======================================================== */}
-          {activeTab === 'products' && (
+          {adminActiveTab === 'header_wa' && (
+            <form onSubmit={handleSaveHeaderAndWa} className="space-y-6 max-w-4xl">
+              
+              {/* Live Header Preview */}
+              <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+                <div className="px-5 py-2.5 bg-slate-100 border-b border-slate-200 flex items-center justify-between text-xs font-bold text-slate-600">
+                  <span>Pratinjau Langsung Header Website</span>
+                  {headerSaved && (
+                    <span className="text-emerald-600 flex items-center gap-1">
+                      <CheckCircle2 className="w-4 h-4" /> Header & No. WA Diperbarui!
+                    </span>
+                  )}
+                </div>
+
+                {/* Simulated Banner */}
+                {compAnnouncementActive && (
+                  <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 text-white text-xs py-1.5 px-4 text-center font-medium">
+                    {compAnnouncement} <span className="underline font-bold ml-1">{announcementCtaText}</span>
+                  </div>
+                )}
+
+                {/* Simulated Navbar */}
+                <div className="px-5 py-3.5 flex flex-wrap items-center justify-between gap-3 bg-white">
+                  <div className="flex items-center gap-2.5">
+                    {logoUrl ? (
+                      <img src={logoUrl} alt="Logo" className="w-9 h-9 rounded-xl object-cover border border-slate-200" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-lg">
+                        {logoText || 'N'}
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-base font-extrabold text-slate-900 block leading-tight font-heading">
+                        {headerTitle} <span className="text-emerald-600">{headerTitleHighlight}</span>
+                      </span>
+                      <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider block">
+                        {headerSubtitle}
+                      </span>
+                    </div>
+                  </div>
+
+                  {showWhatsAppInHeader && (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+                      <PhoneCall className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="font-mono">+{compWa.replace(/[^0-9]/g, '')}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Section 1: WhatsApp Integration Settings */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="w-5 h-5 text-emerald-600" />
+                    <h4 className="font-bold text-base text-slate-900">
+                      1. Pengaturan Nomor WhatsApp Resmi
+                    </h4>
+                  </div>
+                  <a
+                    href={`https://wa.me/${compWa.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(waDefaultMsg || 'Tes koneksi WhatsApp')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
+                  >
+                    <span>Tes Link WA</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      Nomor WhatsApp Tujuan (Format Internasional, misal: 6281234567890):
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={compWa}
+                      onChange={(e) => setCompWa(e.target.value)}
+                      placeholder="6281234567890"
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono outline-none focus:border-emerald-500"
+                    />
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      Seluruh tombol "Tanya WA", form kontak, keranjang, dan tombol floating otomatis terhubung ke nomor ini.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      Pesan Pembuka Default WhatsApp:
+                    </label>
+                    <input
+                      type="text"
+                      value={waDefaultMsg}
+                      onChange={(e) => setWaDefaultMsg(e.target.value)}
+                      placeholder="Halo Admin, saya ingin bertanya seputar produk..."
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500"
+                    />
+                    <label className="flex items-center gap-2 text-xs text-slate-700 font-medium mt-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showWhatsAppInHeader}
+                        onChange={(e) => setShowWhatsAppInHeader(e.target.checked)}
+                        className="rounded text-emerald-600"
+                      />
+                      <span>Tampilkan Nomor WhatsApp langsung di Header atas</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Header Logo, Brand Title & Top Banner */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                  <LayoutTemplate className="w-5 h-5 text-blue-600" />
+                  <h4 className="font-bold text-base text-slate-900">
+                    2. Edit Header Website & Banner Pengumuman
+                  </h4>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      Judul Header (Teks Hitam):
+                    </label>
+                    <input
+                      type="text"
+                      value={headerTitle}
+                      onChange={(e) => setHeaderTitle(e.target.value)}
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      Sorotan Header (Teks Hijau):
+                    </label>
+                    <input
+                      type="text"
+                      value={headerTitleHighlight}
+                      onChange={(e) => setHeaderTitleHighlight(e.target.value)}
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold text-emerald-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      Subjudul Kecil Header:
+                    </label>
+                    <input
+                      type="text"
+                      value={headerSubtitle}
+                      onChange={(e) => setHeaderSubtitle(e.target.value)}
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      Inisial Ikon Logo (1-2 Huruf):
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={2}
+                      value={logoText}
+                      onChange={(e) => setLogoText(e.target.value)}
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold text-center"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      URL Gambar Logo Custom (Opsional, kosongkan jika pakai inisial):
+                    </label>
+                    <input
+                      type="url"
+                      value={logoUrl}
+                      onChange={(e) => setLogoUrl(e.target.value)}
+                      placeholder="https://example.com/logo.png"
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-100 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-slate-700">
+                      Teks Banner Promo Paling Atas:
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer font-medium">
+                      <input
+                        type="checkbox"
+                        checked={compAnnouncementActive}
+                        onChange={(e) => setCompAnnouncementActive(e.target.checked)}
+                        className="rounded text-emerald-600"
+                      />
+                      <span>Aktifkan Banner Pengumuman</span>
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div className="sm:col-span-3">
+                      <input
+                        type="text"
+                        value={compAnnouncement}
+                        onChange={(e) => setCompAnnouncement(e.target.value)}
+                        className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        value={announcementCtaText}
+                        onChange={(e) => setAnnouncementCtaText(e.target.value)}
+                        placeholder="Teks Link CTA"
+                        className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500 font-semibold"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Hero Headline & Description */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                  <Sparkles className="w-5 h-5 text-amber-500" />
+                  <h4 className="font-bold text-base text-slate-900">
+                    3. Edit Teks Hero Section (Bagian Pembuka Utama)
+                  </h4>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">
+                    Badge Atas Hero:
+                  </label>
+                  <input
+                    type="text"
+                    value={heroBadge}
+                    onChange={(e) => setHeroBadge(e.target.value)}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      Judul Utama Hero (Bagian 1):
+                    </label>
+                    <input
+                      type="text"
+                      value={heroTitlePrefix}
+                      onChange={(e) => setHeroTitlePrefix(e.target.value)}
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      Judul Sorotan Warna (Bagian 2):
+                    </label>
+                    <input
+                      type="text"
+                      value={heroTitleHighlight}
+                      onChange={(e) => setHeroTitleHighlight(e.target.value)}
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold text-emerald-700"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-700 block mb-1">
+                    Deskripsi Paragraf Hero:
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={heroDescription}
+                    onChange={(e) => setHeroDescription(e.target.value)}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500 leading-relaxed"
+                  />
+                </div>
+              </div>
+
+              {/* Sticky Submit Row */}
+              <div className="flex items-center justify-between pt-2">
+                {headerSaved ? (
+                  <span className="text-xs text-emerald-600 font-bold flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4" /> Semua perubahan Header, Hero & WhatsApp berhasil disimpan ke website!
+                  </span>
+                ) : (
+                  <span className="text-xs text-slate-500">Perubahan langsung tampil di halaman depan setelah disimpan.</span>
+                )}
+                <button
+                  type="submit"
+                  className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md transition"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Simpan Header & No. WhatsApp</span>
+                </button>
+              </div>
+
+            </form>
+          )}
+
+          {/* ========================================================
+              TAB 3: PRODUCTS CMS
+             ======================================================== */}
+          {adminActiveTab === 'products' && (
             <div className="space-y-4">
               
               {/* Product Toolbar */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200">
-                <span className="font-bold text-sm text-slate-800">
-                  Total {products.length} Produk di Katalog
-                </span>
+                <div className="flex items-center gap-3 flex-1">
+                  <span className="font-bold text-sm text-slate-800 whitespace-nowrap">
+                    Katalog ({products.length} Produk)
+                  </span>
+                  <div className="relative flex-1 max-w-xs">
+                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={productSearch}
+                      onChange={(e) => setProductSearch(e.target.value)}
+                      placeholder="Cari nama produk atau SKU..."
+                      className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
                 
                 <button
                   onClick={handleOpenAdd}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-sm"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>+ Tambah Produk Baru</span>
+                  <span>Tambah Produk Baru</span>
                 </button>
               </div>
 
@@ -500,12 +969,12 @@ export const AdminDashboard: React.FC = () => {
                         <th className="p-3.5">Kategori & SKU</th>
                         <th className="p-3.5">Harga</th>
                         <th className="p-3.5">Stok</th>
-                        <th className="p-3.5">Badge</th>
+                        <th className="p-3.5">Badge & Spek</th>
                         <th className="p-3.5 text-right">Aksi</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {products.map((p) => (
+                      {filteredAdminProducts.map((p) => (
                         <tr key={p.id} className="hover:bg-slate-50 transition">
                           <td className="p-3.5">
                             <div className="flex items-center gap-3">
@@ -528,6 +997,11 @@ export const AdminDashboard: React.FC = () => {
 
                           <td className="p-3.5 font-bold text-slate-900 font-heading">
                             Rp {p.price.toLocaleString('id-ID')}
+                            {p.originalPrice && p.originalPrice > p.price && (
+                              <span className="block text-[10px] font-normal text-slate-400 line-through">
+                                Rp {p.originalPrice.toLocaleString('id-ID')}
+                              </span>
+                            )}
                           </td>
 
                           <td className="p-3.5">
@@ -539,25 +1013,36 @@ export const AdminDashboard: React.FC = () => {
                           </td>
 
                           <td className="p-3.5 space-y-1">
-                            {p.featured && (
-                              <span className="inline-block bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.2 rounded mr-1">
-                                Unggulan
-                              </span>
-                            )}
-                            {p.bestSeller && (
-                              <span className="inline-block bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.2 rounded">
-                                Terlaris
-                              </span>
-                            )}
+                            <div>
+                              {p.featured && (
+                                <span className="inline-block bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.2 rounded mr-1">
+                                  Unggulan
+                                </span>
+                              )}
+                              {p.bestSeller && (
+                                <span className="inline-block bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.2 rounded mr-1">
+                                  Terlaris
+                                </span>
+                              )}
+                              {p.isNew && (
+                                <span className="inline-block bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.2 rounded">
+                                  Baru
+                                </span>
+                              )}
+                            </div>
+                            <span className="block text-[10px] text-slate-400">
+                              {p.specifications.length} spesifikasi • {p.images.length} foto
+                            </span>
                           </td>
 
-                          <td className="p-3.5 text-right space-x-1">
+                          <td className="p-3.5 text-right whitespace-nowrap space-x-1">
                             <button
                               onClick={() => handleOpenEdit(p)}
-                              className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                              className="px-2.5 py-1.5 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg font-semibold inline-flex items-center gap-1 transition"
                               title="Edit Produk"
                             >
-                              <Edit className="w-4 h-4" />
+                              <Edit className="w-3.5 h-3.5" />
+                              <span>Edit</span>
                             </button>
                             <button
                               onClick={() => {
@@ -582,9 +1067,9 @@ export const AdminDashboard: React.FC = () => {
           )}
 
           {/* ========================================================
-              TAB 3: ORDERS MANAGEMENT
+              TAB 4: ORDERS MANAGEMENT
              ======================================================== */}
-          {activeTab === 'orders' && (
+          {adminActiveTab === 'orders' && (
             <div className="space-y-4">
               
               {/* Order Filters */}
@@ -657,7 +1142,6 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Items & Address */}
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 text-xs">
                         <div className="md:col-span-7 space-y-2">
                           <span className="font-semibold text-slate-500 block">Item Belanja:</span>
@@ -687,7 +1171,6 @@ export const AdminDashboard: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Footer Info & WhatsApp Chat Button */}
                       <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                         <div>
                           <span className="text-slate-500">Total Transaksi: </span>
@@ -700,7 +1183,7 @@ export const AdminDashboard: React.FC = () => {
                         </div>
 
                         <a
-                          href={formatWhatsAppUrl(`Halo Kak ${ord.customerName}, kami dari Admin Nusantara Catalog mengabarkan pesanan No. ${ord.orderNumber} dengan status: ${ord.orderStatus.toUpperCase()}`)}
+                          href={formatWhatsAppUrl(`Halo Kak ${ord.customerName}, kami dari Admin ${companySettings.companyName} mengabarkan pesanan No. ${ord.orderNumber} dengan status: ${ord.orderStatus.toUpperCase()}`)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold flex items-center gap-1.5 transition"
@@ -719,9 +1202,9 @@ export const AdminDashboard: React.FC = () => {
           )}
 
           {/* ========================================================
-              TAB 4: SETTINGS & COMPANY PROFILE CMS
+              TAB 5: COMPANY PROFILE CMS
              ======================================================== */}
-          {activeTab === 'settings' && (
+          {adminActiveTab === 'settings' && (
             <form onSubmit={handleSaveSettings} className="space-y-6 max-w-3xl">
               
               <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
@@ -731,7 +1214,7 @@ export const AdminDashboard: React.FC = () => {
                   </h4>
                   {settingsSaved && (
                     <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4" /> Pengaturan Tersimpan!
+                      <CheckCircle2 className="w-4 h-4" /> Profil Perusahaan Tersimpan!
                     </span>
                   )}
                 </div>
@@ -801,12 +1284,12 @@ export const AdminDashboard: React.FC = () => {
 
                   <div>
                     <label className="text-xs font-semibold text-slate-700 block mb-1">
-                      Nomor WhatsApp Resmi (Contoh: 6281234567890):
+                      Nomor Telepon Kantor:
                     </label>
                     <input
                       type="text"
-                      value={compWa}
-                      onChange={(e) => setCompWa(e.target.value)}
+                      value={compPhone}
+                      onChange={(e) => setCompPhone(e.target.value)}
                       className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500 font-mono"
                     />
                   </div>
@@ -838,36 +1321,12 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Announcement Bar */}
-                <div className="pt-2 border-t border-slate-100 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-700">
-                      Teks Bar Pengumuman (Top Banner):
-                    </label>
-                    <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={compAnnouncementActive}
-                        onChange={(e) => setCompAnnouncementActive(e.target.checked)}
-                        className="rounded text-emerald-600"
-                      />
-                      <span>Tampilkan Banner</span>
-                    </label>
-                  </div>
-                  <input
-                    type="text"
-                    value={compAnnouncement}
-                    onChange={(e) => setCompAnnouncement(e.target.value)}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500"
-                  />
-                </div>
-
                 <button
                   type="submit"
                   className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-md transition"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Simpan Perubahan Website</span>
+                  <span>Simpan Profil Perusahaan</span>
                 </button>
 
               </div>
@@ -876,9 +1335,9 @@ export const AdminDashboard: React.FC = () => {
           )}
 
           {/* ========================================================
-              TAB 5: REVIEWS MODERATION
+              TAB 6: REVIEWS MODERATION
              ======================================================== */}
-          {activeTab === 'reviews' && (
+          {adminActiveTab === 'reviews' && (
             <div className="space-y-4">
               <div className="bg-white p-4 rounded-2xl border border-slate-200">
                 <span className="font-bold text-sm text-slate-800">
@@ -919,29 +1378,47 @@ export const AdminDashboard: React.FC = () => {
       {/* PRODUCT ADD / EDIT POPUP MODAL */}
       {isProductModalOpen && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/80 animate-in fade-in">
-          <div className="bg-white w-full max-w-xl max-h-[90vh] rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-              <h4 className="font-bold text-sm text-slate-900">
-                {editingProduct ? 'Edit Informasi Produk' : 'Tambah Produk Baru ke Katalog'}
-              </h4>
+          <div className="bg-white w-full max-w-2xl max-h-[92vh] rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-emerald-600" />
+                <h4 className="font-bold text-sm sm:text-base text-slate-900">
+                  {editingProduct ? 'Edit Informasi & Spesifikasi Produk' : 'Tambah Produk Baru ke Katalog'}
+                </h4>
+              </div>
               <button onClick={() => setIsProductModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-700">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveProduct} className="p-6 overflow-y-auto space-y-4 text-xs">
-              <div>
-                <label className="font-semibold text-slate-700 block mb-1">Nama Produk *</label>
-                <input
-                  type="text"
-                  required
-                  value={prodName}
-                  onChange={(e) => setProdName(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500"
-                />
+            <form onSubmit={handleSaveProduct} className="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs">
+              
+              {/* Basic Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Nama Produk (Indonesia) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={prodName}
+                    onChange={(e) => setProdName(e.target.value)}
+                    placeholder="Contoh: Nusantara Headphone Pro"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Nama Produk (English - Opsional)</label>
+                  <input
+                    type="text"
+                    value={prodNameEn}
+                    onChange={(e) => setProdNameEn(e.target.value)}
+                    placeholder="Opsional untuk mode multi-bahasa"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500"
+                  />
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="font-semibold text-slate-700 block mb-1">Kategori</label>
                   <select
@@ -954,7 +1431,18 @@ export const AdminDashboard: React.FC = () => {
                     <option value="Kopi & F&B Nusantara">Kopi & F&B Nusantara</option>
                     <option value="Fashion & Apparel">Fashion & Apparel</option>
                     <option value="Aksesoris">Aksesoris</option>
+                    <option value="__custom__">+ Tulis Kategori Baru...</option>
                   </select>
+                  {prodCategory === '__custom__' && (
+                    <input
+                      type="text"
+                      required
+                      value={prodCustomCategory}
+                      onChange={(e) => setProdCustomCategory(e.target.value)}
+                      placeholder="Masukkan nama kategori baru"
+                      className="mt-2 w-full p-2.5 bg-emerald-50 border border-emerald-300 rounded-xl outline-none focus:border-emerald-500"
+                    />
+                  )}
                 </div>
 
                 <div>
@@ -974,6 +1462,7 @@ export const AdminDashboard: React.FC = () => {
                   <input
                     type="number"
                     required
+                    min={0}
                     value={prodPrice}
                     onChange={(e) => setProdPrice(Number(e.target.value))}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold"
@@ -984,6 +1473,7 @@ export const AdminDashboard: React.FC = () => {
                   <label className="font-semibold text-slate-700 block mb-1">Harga Coret (Rp)</label>
                   <input
                     type="number"
+                    min={0}
                     value={prodOriginalPrice}
                     onChange={(e) => setProdOriginalPrice(Number(e.target.value))}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500"
@@ -994,6 +1484,7 @@ export const AdminDashboard: React.FC = () => {
                   <label className="font-semibold text-slate-700 block mb-1">Jumlah Stok</label>
                   <input
                     type="number"
+                    min={0}
                     value={prodStock}
                     onChange={(e) => setProdStock(Number(e.target.value))}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-bold"
@@ -1001,14 +1492,55 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="font-semibold text-slate-700 block mb-1">URL Foto Produk</label>
-                <input
-                  type="url"
-                  value={prodImage}
-                  onChange={(e) => setProdImage(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500"
-                />
+              {/* Multiple Images Editor */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                    <ImageIcon className="w-4 h-4 text-emerald-600" />
+                    <span>Foto Produk (URL Gambar)</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setProdImages([...prodImages, ''])}
+                    className="px-2.5 py-1 bg-white border border-slate-300 hover:bg-slate-100 rounded-lg text-[11px] font-bold text-slate-700"
+                  >
+                    + Tambah Foto
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {prodImages.map((imgUrl, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      {imgUrl && (
+                        <img
+                          src={imgUrl}
+                          alt="Preview"
+                          className="w-9 h-9 rounded-lg object-cover border border-slate-200 shrink-0 bg-white"
+                        />
+                      )}
+                      <input
+                        type="url"
+                        value={imgUrl}
+                        onChange={(e) => {
+                          const updated = [...prodImages];
+                          updated[idx] = e.target.value;
+                          setProdImages(updated);
+                        }}
+                        placeholder="https://images.unsplash.com/..."
+                        className="flex-1 p-2 bg-white border border-slate-200 rounded-xl outline-none focus:border-emerald-500"
+                      />
+                      {prodImages.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setProdImages(prodImages.filter((_, i) => i !== idx))}
+                          className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div>
@@ -1021,26 +1553,89 @@ export const AdminDashboard: React.FC = () => {
                 />
               </div>
 
+              {/* Dynamic Specifications Editor */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                    <ListChecks className="w-4 h-4 text-blue-600" />
+                    <span>Spesifikasi Teknis Produk</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setProdSpecs([...prodSpecs, { label: '', value: '' }])}
+                    className="px-2.5 py-1 bg-white border border-slate-300 hover:bg-slate-100 rounded-lg text-[11px] font-bold text-slate-700"
+                  >
+                    + Tambah Baris Spek
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {prodSpecs.map((spec, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={spec.label}
+                        onChange={(e) => {
+                          const updated = [...prodSpecs];
+                          updated[idx] = { ...updated[idx], label: e.target.value };
+                          setProdSpecs(updated);
+                        }}
+                        placeholder="Label (misal: Baterai)"
+                        className="w-1/3 p-2 bg-white border border-slate-200 rounded-xl outline-none focus:border-emerald-500 font-semibold"
+                      />
+                      <input
+                        type="text"
+                        value={spec.value}
+                        onChange={(e) => {
+                          const updated = [...prodSpecs];
+                          updated[idx] = { ...updated[idx], value: e.target.value };
+                          setProdSpecs(updated);
+                        }}
+                        placeholder="Nilai (misal: 450 mAh / 14 Hari)"
+                        className="flex-1 p-2 bg-white border border-slate-200 rounded-xl outline-none focus:border-emerald-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setProdSpecs(prodSpecs.filter((_, i) => i !== idx))}
+                        className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Toggles */}
-              <div className="flex gap-4 pt-2 border-t border-slate-100">
-                <label className="flex items-center gap-2 cursor-pointer">
+              <div className="flex flex-wrap gap-4 pt-2 border-t border-slate-100">
+                <label className="flex items-center gap-2 cursor-pointer font-medium">
                   <input
                     type="checkbox"
                     checked={prodFeatured}
                     onChange={(e) => setProdFeatured(e.target.checked)}
                     className="rounded text-emerald-600"
                   />
-                  <span>Jadikan Produk Unggulan</span>
+                  <span>Produk Unggulan</span>
                 </label>
 
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer font-medium">
                   <input
                     type="checkbox"
                     checked={prodBestSeller}
                     onChange={(e) => setProdBestSeller(e.target.checked)}
                     className="rounded text-emerald-600"
                   />
-                  <span>Badge Terlaris (Best Seller)</span>
+                  <span>Terlaris (Best Seller)</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer font-medium">
+                  <input
+                    type="checkbox"
+                    checked={prodIsNew}
+                    onChange={(e) => setProdIsNew(e.target.checked)}
+                    className="rounded text-emerald-600"
+                  />
+                  <span>Label Baru (New)</span>
                 </label>
               </div>
 
@@ -1054,7 +1649,7 @@ export const AdminDashboard: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold"
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-sm"
                 >
                   Simpan Produk
                 </button>

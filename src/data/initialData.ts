@@ -2,6 +2,16 @@ import { Product, CompanySettings, Review, Order, DailySalesMetric } from '../ty
 
 export const initialCompanySettings: CompanySettings = {
   companyName: 'Nusantara Catalog & Innovations',
+  logoText: 'N',
+  logoUrl: '',
+  headerTitle: 'Nusantara',
+  headerTitleHighlight: 'Catalog',
+  headerSubtitle: 'Official Store & Innovations',
+  showWhatsAppInHeader: true,
+  heroBadge: 'Koleksi Eksklusif & Kualitas Terjamin',
+  heroTitlePrefix: 'Solusi Produk Unggulan untuk',
+  heroTitleHighlight: 'Gaya Hidup & Bisnis Anda',
+  heroDescription: 'Jelajahi katalog resmi terlengkap dengan garansi original, pengiriman ke seluruh Nusantara & internasional, kemudahan pesan via WhatsApp, serta pembayaran instan real-time.',
   tagline: 'Katalog Produk Unggulan & Solusi Gaya Hidup Modern Nusantara',
   taglineEn: 'Premier Product Catalog & Modern Lifestyle Solutions',
   aboutStory: 'Berdiri sejak 2019, Nusantara Catalog & Innovations adalah pelopor platform kurasi produk unggulan berstandar tinggi di Indonesia. Kami menghubungkan keunggulan material lokal dengan inovasi desain kelas dunia. Melayani lebih dari 35.000 pelanggan korporat maupun perorangan di 38 provinsi di Indonesia dan mancanegara, kami berkomitmen menjaga transparansi harga, garansi purna jual resmi, serta kemudahan transaksi cepat melalui WhatsApp dan gateway pembayaran real-time.',
@@ -25,6 +35,7 @@ export const initialCompanySettings: CompanySettings = {
   founderBio: 'Berpengalaman lebih dari 12 tahun di bidang supply chain, industri teknologi, dan retail modern di Indonesia. Berkomitmen membangun ekosistem katalog digital yang mengutamakan integritas dan kepuasan konsumen.',
   founderAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
   whatsappNumber: '6281234567890',
+  whatsappDefaultMessage: 'Halo Admin, saya ingin menanyakan seputar produk & promo hari ini.',
   email: 'halo@nusantaracatalog.id',
   phone: '+62 21 5589 4432',
   address: 'Menara Nusantara Lantai 18, Jl. Jenderal Sudirman Kav. 52-53, Jakarta Selatan, 12190',
@@ -34,6 +45,7 @@ export const initialCompanySettings: CompanySettings = {
   socialLinkedIn: 'linkedin.com/company/nusantara-catalog',
   announcementText: '🔥 PROMO HARI INI: Gratis Ongkir Seluruh Indonesia + Diskon Tambahan 10% dengan Kode DISKONHEMAT!',
   announcementTextEn: '🔥 TODAY\'S PROMO: Free Nationwide Shipping + Extra 10% OFF with code DISKONHEMAT!',
+  announcementCtaText: 'Klaim Promo',
   isAnnouncementActive: true
 };
 
