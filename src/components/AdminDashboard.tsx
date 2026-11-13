@@ -30,7 +30,10 @@ import {
   LogOut,
   Mail,
   Eye,
-  EyeOff
+  EyeOff,
+  Download,
+  Upload,
+  FileCode
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Product, OrderStatus } from '../types';
@@ -47,6 +50,7 @@ export const AdminDashboard: React.FC = () => {
     addProduct, 
     updateProduct, 
     deleteProduct, 
+    importSiteData,
     orders, 
     updateOrderStatus, 
     reviews, 
@@ -118,6 +122,7 @@ export const AdminDashboard: React.FC = () => {
   const [compAddress, setCompAddress] = useState(companySettings.address);
   const [compFounderName, setCompFounderName] = useState(companySettings.founderName);
   const [settingsSaved, setSettingsSaved] = useState(false);
+  const [syncNotice, setSyncNotice] = useState('');
 
   // Keep local form states synchronized with companySettings
   useEffect(() => {
@@ -415,6 +420,69 @@ export const AdminDashboard: React.FC = () => {
     });
     setSettingsSaved(true);
     setTimeout(() => setSettingsSaved(false), 2500);
+  };
+
+  const handleExportJson = () => {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      companySettings,
+      products
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'backup-website-catalog.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    setSyncNotice('File backup JSON berhasil diunduh!');
+    setTimeout(() => setSyncNotice(''), 3000);
+  };
+
+  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result));
+        importSiteData({
+          products: Array.isArray(parsed.products) ? parsed.products : undefined,
+          companySettings: parsed.companySettings && typeof parsed.companySettings === 'object' ? parsed.companySettings : undefined
+        });
+        setSyncNotice('Data berhasil diimpor dan disinkronkan ke browser ini!');
+        setTimeout(() => setSyncNotice(''), 3500);
+      } catch {
+        setSyncNotice('Format file JSON tidak valid.');
+        setTimeout(() => setSyncNotice(''), 3500);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const handleDownloadInitialDataTs = () => {
+    const tsContent = `import { Product, CompanySettings, Review, Order, DailySalesMetric } from '../types';
+
+export const initialCompanySettings: CompanySettings = ${JSON.stringify(companySettings, null, 2)};
+
+export const initialProducts: Product[] = ${JSON.stringify(products, null, 2)};
+
+export const initialReviews: Review[] = ${JSON.stringify(reviews, null, 2)};
+
+export const initialOrders: Order[] = ${JSON.stringify(orders, null, 2)};
+
+export const initialDailySalesMetrics: DailySalesMetric[] = ${JSON.stringify(dailyMetrics, null, 2)};
+`;
+    const blob = new Blob([tsContent], { type: 'text/typescript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'initialData.ts';
+    a.click();
+    URL.revokeObjectURL(url);
+    setSyncNotice('File initialData.ts berhasil diunduh untuk publish permanen!');
+    setTimeout(() => setSyncNotice(''), 3500);
   };
 
   // Filter Products in Admin Table
@@ -1451,6 +1519,58 @@ export const AdminDashboard: React.FC = () => {
                   <span>Simpan Profil Perusahaan</span>
                 </button>
 
+              </div>
+
+              {/* Backup, Transfer & Publish Sync Card */}
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+                  <div>
+                    <h4 className="font-bold text-base text-slate-900">
+                      Sinkronisasi Antar Browser & Publish Permanen
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Perubahan di /admin otomatis sinkron antar-tab di browser yang sama. Untuk memindahkan data ke browser/profil Chrome lain atau memperbarui data bawaan saat publish ulang ke Netlify, gunakan tombol di bawah.
+                    </p>
+                  </div>
+                </div>
+
+                {syncNotice && (
+                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{syncNotice}</span>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleExportJson}
+                    className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-2 transition"
+                  >
+                    <Download className="w-4 h-4 text-emerald-400" />
+                    <span>Export Backup (.json)</span>
+                  </button>
+
+                  <label className="px-4 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-2 cursor-pointer transition">
+                    <Upload className="w-4 h-4 text-emerald-600" />
+                    <span>Import Backup (.json)</span>
+                    <input
+                      type="file"
+                      accept=".json,application/json"
+                      onChange={handleImportJson}
+                      className="hidden"
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={handleDownloadInitialDataTs}
+                    className="px-4 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs font-bold flex items-center gap-2 transition"
+                  >
+                    <FileCode className="w-4 h-4 text-blue-600" />
+                    <span>Download initialData.ts (Publish)</span>
+                  </button>
+                </div>
               </div>
 
             </form>

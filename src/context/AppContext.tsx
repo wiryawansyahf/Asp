@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { 
   Product, 
   CartItem, 
@@ -70,10 +70,11 @@ interface AppContextType {
   companySettings: CompanySettings;
   updateCompanySettings: (settings: Partial<CompanySettings>) => void;
   
-  // Admin CMS for Products
+  // Admin CMS for Products & Data Sync
   addProduct: (product: Omit<Product, 'id' | 'rating' | 'reviewCount'>) => void;
   updateProduct: (product: Product) => void;
   deleteProduct: (productId: string) => void;
+  importSiteData: (data: { products?: Product[]; companySettings?: Partial<CompanySettings> }) => void;
   
   // Notifications
   notifications: AppNotification[];
@@ -178,8 +179,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return initialProducts;
   });
 
+  const isExternalSyncRef = useRef(false);
+  const syncChannelRef = useRef<BroadcastChannel | null>(null);
+  const tabIdRef = useRef<string>(`tab-${Math.random().toString(36).slice(2)}`);
+
+  const broadcastSync = (key: string, payload: unknown) => {
+    try {
+      syncChannelRef.current?.postMessage({
+        senderId: tabIdRef.current,
+        key,
+        payload
+      });
+    } catch {
+      // Ignore if BroadcastChannel is unavailable
+    }
+  };
+
   useEffect(() => {
     localStorage.setItem('nc_products', JSON.stringify(products));
+    if (!isExternalSyncRef.current) {
+      broadcastSync('nc_products', products);
+    }
   }, [products]);
 
   // Company Settings (merged with initialCompanySettings for backwards compatibility)
@@ -195,6 +215,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     localStorage.setItem('nc_company', JSON.stringify(companySettings));
+    if (!isExternalSyncRef.current) {
+      broadcastSync('nc_company', companySettings);
+    }
   }, [companySettings]);
 
   // Reviews
@@ -208,6 +231,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     localStorage.setItem('nc_reviews', JSON.stringify(reviews));
+    if (!isExternalSyncRef.current) {
+      broadcastSync('nc_reviews', reviews);
+    }
   }, [reviews]);
 
   // Orders
@@ -221,6 +247,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     localStorage.setItem('nc_orders', JSON.stringify(orders));
+    if (!isExternalSyncRef.current) {
+      broadcastSync('nc_orders', orders);
+    }
   }, [orders]);
 
   // Cart
@@ -235,6 +264,54 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     localStorage.setItem('nc_cart', JSON.stringify(cart));
   }, [cart]);
+
+  // Real-time Cross-Tab Synchronization (storage event + BroadcastChannel)
+  useEffect(() => {
+    const applySyncedData = (key: string, payload: unknown) => {
+      isExternalSyncRef.current = true;
+      if (key === 'nc_products' && Array.isArray(payload)) {
+        setProducts(payload as Product[]);
+      } else if (key === 'nc_company' && payload && typeof payload === 'object') {
+        setCompanySettings({ ...initialCompanySettings, ...(payload as Partial<CompanySettings>) });
+      } else if (key === 'nc_orders' && Array.isArray(payload)) {
+        setOrders(payload as Order[]);
+      } else if (key === 'nc_reviews' && Array.isArray(payload)) {
+        setReviews(payload as Review[]);
+      }
+      setTimeout(() => {
+        isExternalSyncRef.current = false;
+      }, 0);
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      if (!e.key || !e.newValue) return;
+      if (['nc_products', 'nc_company', 'nc_orders', 'nc_reviews'].includes(e.key)) {
+        try {
+          applySyncedData(e.key, JSON.parse(e.newValue));
+        } catch {
+          // Ignore malformed JSON
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+
+    if (typeof BroadcastChannel !== 'undefined') {
+      const channel = new BroadcastChannel('nc_sync_channel');
+      syncChannelRef.current = channel;
+      channel.onmessage = (event) => {
+        const data = event.data;
+        if (!data || data.senderId === tabIdRef.current) return;
+        applySyncedData(data.key, data.payload);
+      };
+    }
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      syncChannelRef.current?.close();
+      syncChannelRef.current = null;
+    };
+  }, []);
 
   // Notifications
   const [notifications, setNotifications] = useState<AppNotification[]>([
@@ -562,6 +639,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setProducts((prev) => prev.filter((p) => p.id !== productId));
   };
 
+  const importSiteData = (data: { products?: Product[]; companySettings?: Partial<CompanySettings> }) => {
+    if (Array.isArray(data.products)) {
+      setProducts(data.products);
+    }
+    if (data.companySettings && typeof data.companySettings === 'object') {
+      setCompanySettings((prev) => ({ ...prev, ...data.companySettings }));
+    }
+  };
+
   // Notifications
   const unreadNotificationCount = notifications.filter((n) => !n.read).length;
 
@@ -668,6 +754,7 @@ Mohon konfirmasi ketersediaan dan langkah pembayaran selanjutnya. Terima kasih!`
         addProduct,
         updateProduct,
         deleteProduct,
+        importSiteData,
         notifications,
         unreadNotificationCount,
         markNotificationRead,
