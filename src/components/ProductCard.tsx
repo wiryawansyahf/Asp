@@ -7,9 +7,7 @@ import {
   Check, 
   Flame, 
   Sparkles,
-  Percent,
-  Pencil,
-  Trash2
+  Percent
 } from 'lucide-react';
 import { Product } from '../types';
 import { useApp } from '../context/AppContext';
@@ -24,11 +22,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     t, 
     openProductDetail, 
     addToCart, 
-    createWhatsAppProductInquiryUrl,
-    isAdmin,
-    isInlineEditMode,
-    openProductEditor,
-    deleteProduct
+    createWhatsAppProductInquiryUrl
   } = useApp();
 
   const [isAddedRecently, setIsAddedRecently] = React.useState(false);
@@ -88,35 +82,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <Percent className="w-3 h-3" />
               {product.discountPercentage}%
             </span>
-          </div>
-        )}
-
-        {/* Admin Inline Quick Edit/Delete Bar */}
-        {isAdmin && isInlineEditMode && (
-          <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center gap-1.5">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                openProductEditor(product);
-              }}
-              className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-[11px] shadow-md flex items-center gap-1 transition"
-              title="Edit Produk Ini"
-            >
-              <Pencil className="w-3 h-3" />
-              <span>Edit</span>
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (confirm(`Hapus produk "${product.name}" dari katalog?`)) {
-                  deleteProduct(product.id);
-                }
-              }}
-              className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-md transition"
-              title="Hapus Produk Ini"
-            >
-              <Trash2 className="w-3 h-3" />
-            </button>
           </div>
         )}
 

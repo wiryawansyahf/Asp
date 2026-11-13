@@ -22,19 +22,27 @@ import {
   PhoneCall,
   Image as ImageIcon,
   ListChecks,
-  Sparkles
+  Sparkles,
+  ShieldCheck,
+  KeyRound,
+  Lock,
+  ArrowLeft,
+  LogOut,
+  Mail,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Product, OrderStatus } from '../types';
 
 export const AdminDashboard: React.FC = () => {
   const { 
-    isAdminOpen, 
-    setIsAdminOpen, 
+    isAdminAuthenticated,
+    loginAdmin,
+    logoutAdmin,
+    navigateTo,
     adminActiveTab,
     setAdminActiveTab,
-    directEditProduct,
-    setDirectEditProduct,
     products, 
     addProduct, 
     updateProduct, 
@@ -47,6 +55,12 @@ export const AdminDashboard: React.FC = () => {
     dailyMetrics,
     formatWhatsAppUrl
   } = useApp();
+
+  // Admin Login Gate State (/admin)
+  const [adminEmail, setAdminEmail] = useState('admin@nusantaracatalog.id');
+  const [adminPin, setAdminPin] = useState('');
+  const [showPin, setShowPin] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   // Product Add / Edit Modal
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -131,7 +145,7 @@ export const AdminDashboard: React.FC = () => {
     setCompPhone(companySettings.phone);
     setCompAddress(companySettings.address);
     setCompFounderName(companySettings.founderName);
-  }, [companySettings, isAdminOpen]);
+  }, [companySettings, isAdminAuthenticated]);
 
   // Open Edit Product helper
   const handleOpenEdit = (p: Product) => {
@@ -182,19 +196,115 @@ export const AdminDashboard: React.FC = () => {
     setIsProductModalOpen(true);
   };
 
-  // Handle direct product edit trigger from Storefront cards
-  useEffect(() => {
-    if (isAdminOpen && directEditProduct) {
-      if (directEditProduct === 'new') {
-        handleOpenAdd();
-      } else {
-        handleOpenEdit(directEditProduct);
-      }
-      setDirectEditProduct(null);
+  const handleAdminLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const val = adminPin.trim();
+    if (val === '1234' || val.toLowerCase() === 'admin' || val.toLowerCase() === 'admin123') {
+      loginAdmin();
+      setAdminPin('');
+      setLoginError('');
+    } else {
+      setLoginError('PIN / Password Admin salah. Gunakan PIN demo: 1234');
     }
-  }, [isAdminOpen, directEditProduct]);
+  };
 
-  if (!isAdminOpen) return null;
+  if (!isAdminAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-4">
+          <button
+            onClick={() => navigateTo('/')}
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-emerald-300 transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Kembali ke Katalog Website</span>
+          </button>
+
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="p-6 bg-slate-900 text-white border-b border-slate-800 flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-lg">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="font-extrabold text-base sm:text-lg leading-tight">
+                  Portal Admin CMS
+                </h1>
+                <p className="text-xs text-slate-400">
+                  {companySettings.companyName} • Akses Terproteksi (/admin)
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleAdminLoginSubmit} className="p-6 space-y-4">
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 leading-relaxed">
+                Masuk untuk mengelola <strong>Header, Nomor WhatsApp, Katalog Produk, Pesanan, Analitik, dan Profil Perusahaan</strong>.
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">
+                  Email / Username Admin
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    required
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-slate-700">
+                    PIN / Password Akses
+                  </label>
+                  <span className="text-[11px] font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-600">
+                    PIN Demo: <strong>1234</strong>
+                  </span>
+                </div>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPin ? 'text' : 'password'}
+                    required
+                    autoFocus
+                    value={adminPin}
+                    onChange={(e) => {
+                      setAdminPin(e.target.value);
+                      setLoginError('');
+                    }}
+                    placeholder="Masukkan PIN Admin (1234)"
+                    className="w-full pl-9 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:border-emerald-500 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="p-1 text-slate-400 hover:text-slate-600 absolute right-2.5 top-1/2 -translate-y-1/2"
+                  >
+                    {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {loginError && (
+                  <p className="text-[11px] text-rose-600 font-semibold mt-1.5">{loginError}</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2"
+              >
+                <Lock className="w-4 h-4" />
+                <span>Masuk ke Dashboard Admin</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Analytics Computations
   const totalRevenue = orders.reduce((sum, ord) => sum + (ord.paymentStatus === 'paid' ? ord.total : 0), 0);
@@ -333,40 +443,50 @@ export const AdminDashboard: React.FC = () => {
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-xs animate-in fade-in">
-      <div className="bg-white w-full max-w-6xl max-h-[96vh] rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
-        
-        {/* Top Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-900 text-white flex items-center justify-between shrink-0">
+    <div className="min-h-screen bg-slate-100 flex flex-col">
+      {/* Top Header */}
+      <header className="sticky top-0 z-30 bg-slate-900 text-white border-b border-slate-800 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center font-bold text-white shadow-md">
               ADM
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-extrabold text-white text-base sm:text-lg">
+                <h1 className="font-extrabold text-white text-base sm:text-lg">
                   Dashboard Admin & Editor Website
-                </h3>
+                </h1>
                 <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
-                  Live CMS
+                  /admin
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 hidden sm:block">
                 Edit Header, Nomor WhatsApp, Katalog Produk, Laporan Penjualan Harian & Profil Perusahaan
               </p>
             </div>
           </div>
 
-          <button
-            onClick={() => setIsAdminOpen(false)}
-            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition"
-          >
-            <X className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigateTo('/')}
+              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 border border-slate-700 transition"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Lihat Website</span>
+            </button>
+            <button
+              onClick={logoutAdmin}
+              className="px-3.5 py-2 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-bold flex items-center gap-1.5 transition"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Keluar Admin</span>
+            </button>
+          </div>
         </div>
 
         {/* Navigation Tabs Bar */}
-        <div className="flex items-center border-b border-slate-200 bg-slate-50 px-4 sm:px-6 overflow-x-auto shrink-0 scrollbar-none text-xs sm:text-sm font-bold">
+        <div className="bg-slate-50 border-t border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center overflow-x-auto scrollbar-none text-xs sm:text-sm font-bold">
           <button
             onClick={() => setAdminActiveTab('analytics')}
             className={`py-3.5 px-3 flex items-center gap-2 border-b-2 transition whitespace-nowrap ${
@@ -438,10 +558,12 @@ export const AdminDashboard: React.FC = () => {
             <Star className="w-4 h-4 text-amber-500" />
             <span>Ulasan ({reviews.length})</span>
           </button>
+          </div>
         </div>
+      </header>
 
         {/* Tab Body Contents */}
-        <div className="p-5 sm:p-8 overflow-y-auto flex-1 bg-slate-50/50">
+        <main className="max-w-7xl mx-auto w-full p-5 sm:p-8 flex-1">
           
           {/* ========================================================
               TAB 1: ANALYTICS
@@ -1371,9 +1493,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-        </div>
-
-      </div>
+        </main>
 
       {/* PRODUCT ADD / EDIT POPUP MODAL */}
       {isProductModalOpen && (

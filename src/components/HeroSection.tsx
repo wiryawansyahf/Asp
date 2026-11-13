@@ -8,8 +8,7 @@ import {
   QrCode, 
   Star, 
   Award,
-  CheckCircle2,
-  Pencil
+  CheckCircle2
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -21,10 +20,7 @@ export const HeroSection: React.FC = () => {
     formatWhatsAppUrl, 
     products, 
     openProductDetail,
-    setSelectedCategory,
-    isAdmin,
-    isInlineEditMode,
-    openAdminTab
+    setSelectedCategory
   } = useApp();
 
   const featuredProduct = products.find((p) => p.featured) || products[0];
@@ -55,22 +51,12 @@ export const HeroSection: React.FC = () => {
           {/* Left Column: Headlines & CTAs */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             
-            {/* Pill Badge + Inline Admin Edit Button */}
+            {/* Pill Badge */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold backdrop-blur-xs">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                 <span>{language === 'id' ? (companySettings.heroBadge || t.heroBadge) : t.heroBadge}</span>
               </div>
-
-              {isAdmin && isInlineEditMode && (
-                <button
-                  onClick={() => openAdminTab('header_wa')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold shadow-md transition"
-                >
-                  <Pencil className="w-3 h-3" />
-                  <span>Edit Hero & Header</span>
-                </button>
-              )}
             </div>
 
             {/* Main Headline */}

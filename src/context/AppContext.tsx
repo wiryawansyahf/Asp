@@ -21,13 +21,17 @@ import {
 import { translations } from '../locales/translations';
 
 export type AdminTab = 'analytics' | 'products' | 'orders' | 'header_wa' | 'settings' | 'reviews';
-export type AuthTab = 'signin' | 'signup' | 'forgot' | 'admin';
+export type AuthTab = 'signin' | 'signup' | 'forgot';
 
 interface AppContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: typeof translations.id;
   
+  // Route Navigation (/ vs /admin)
+  isAdminRoute: boolean;
+  navigateTo: (path: '/' | '/admin') => void;
+
   // Products & Filtering
   products: Product[];
   selectedCategory: string;
@@ -78,20 +82,17 @@ interface AppContextType {
   markAllNotificationsRead: () => void;
   playNotificationSound: () => void;
   
-  // Auth & Admin Access
+  // Customer Auth
   currentUser: User | null;
-  isAdmin: boolean;
   login: (email: string, role?: 'customer' | 'admin', name?: string) => void;
   logout: () => void;
-  isInlineEditMode: boolean;
-  setIsInlineEditMode: (val: boolean) => void;
+
+  // Dedicated Admin Portal Auth (/admin)
+  isAdminAuthenticated: boolean;
+  loginAdmin: () => void;
+  logoutAdmin: () => void;
   adminActiveTab: AdminTab;
   setAdminActiveTab: (tab: AdminTab) => void;
-  openAdminTab: (tab?: AdminTab) => void;
-  openAdminAccess: () => void;
-  directEditProduct: Product | 'new' | null;
-  setDirectEditProduct: (prod: Product | 'new' | null) => void;
-  openProductEditor: (prod: Product | 'new') => void;
   
   // Modals & Navigation
   isCartOpen: boolean;
@@ -102,8 +103,6 @@ interface AppContextType {
   setIsAuthOpen: (open: boolean) => void;
   authInitialTab: AuthTab;
   setAuthInitialTab: (tab: AuthTab) => void;
-  isAdminOpen: boolean;
-  setIsAdminOpen: (open: boolean) => void;
   isOrdersOpen: boolean;
   setIsOrdersOpen: (open: boolean) => void;
   isCompanyModalOpen: boolean;
@@ -261,11 +260,56 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Daily Sales Metrics
   const [dailyMetrics, setDailyMetrics] = useState<DailySalesMetric[]>(initialDailySalesMetrics);
 
-  // Auth User
+  // Route Detection (/admin vs /)
+  const checkIsAdminRoute = () => {
+    const cleanPath = window.location.pathname.replace(/\/+$/, '');
+    return cleanPath === '/admin' || cleanPath.endsWith('/admin') || window.location.hash === '#/admin';
+  };
+
+  const [isAdminRoute, setIsAdminRoute] = useState<boolean>(checkIsAdminRoute);
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setIsAdminRoute(checkIsAdminRoute());
+    };
+    window.addEventListener('popstate', handleRouteChange);
+    window.addEventListener('hashchange', handleRouteChange);
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+      window.removeEventListener('hashchange', handleRouteChange);
+    };
+  }, []);
+
+  const navigateTo = (path: '/' | '/admin') => {
+    window.history.pushState({}, '', path);
+    setIsAdminRoute(path === '/admin');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Dedicated Admin Authentication (/admin portal)
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('nc_admin_auth') === 'true';
+  });
+
+  const loginAdmin = () => {
+    setIsAdminAuthenticated(true);
+    localStorage.setItem('nc_admin_auth', 'true');
+  };
+
+  const logoutAdmin = () => {
+    setIsAdminAuthenticated(false);
+    localStorage.removeItem('nc_admin_auth');
+  };
+
+  // Auth User (Customer)
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('nc_user');
     if (saved) {
-      try { return JSON.parse(saved); } catch { /* ignore */ }
+      try {
+        const parsed = JSON.parse(saved);
+        // Ensure public customer session does not show legacy admin badge
+        return parsed.role === 'admin' ? null : parsed;
+      } catch { /* ignore */ }
     }
     return null;
   });
@@ -290,45 +334,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authInitialTab, setAuthInitialTab] = useState<AuthTab>('signin');
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [adminActiveTab, setAdminActiveTab] = useState<AdminTab>('analytics');
-  const [isInlineEditMode, setIsInlineEditMode] = useState<boolean>(false);
-  const [directEditProduct, setDirectEditProduct] = useState<Product | 'new' | null>(null);
   const [isOrdersOpen, setIsOrdersOpen] = useState(false);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
-
-  const isAdmin = currentUser?.role === 'admin';
-
-  const openAdminTab = (tab: AdminTab = 'analytics') => {
-    if (!isAdmin) {
-      setAdminActiveTab(tab);
-      setAuthInitialTab('admin');
-      setIsAuthOpen(true);
-      return;
-    }
-    setAdminActiveTab(tab);
-    setIsAdminOpen(true);
-  };
-
-  const openAdminAccess = () => {
-    if (isAdmin) {
-      setIsAdminOpen(true);
-    } else {
-      setAuthInitialTab('admin');
-      setIsAuthOpen(true);
-    }
-  };
-
-  const openProductEditor = (prod: Product | 'new') => {
-    if (!isAdmin) {
-      setAuthInitialTab('admin');
-      setIsAuthOpen(true);
-      return;
-    }
-    setAdminActiveTab('products');
-    setDirectEditProduct(prod);
-    setIsAdminOpen(true);
-  };
 
   // Product Detail
   const openProductDetail = (prod: Product) => {
@@ -560,28 +568,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // Auth
-  const login = (email: string, role: 'customer' | 'admin' = 'customer', name?: string) => {
+  const login = (email: string, _role: 'customer' | 'admin' = 'customer', name?: string) => {
     const user: User = {
       id: `user-${Date.now()}`,
-      name: name || (role === 'admin' ? 'Admin Official' : email.split('@')[0]),
+      name: name || email.split('@')[0],
       email,
       phone: '08123456789',
-      role,
-      avatar: role === 'admin' 
-        ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
-        : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'
+      role: 'customer',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'
     };
     setCurrentUser(user);
     setIsAuthOpen(false);
-    if (role === 'admin') {
-      setIsInlineEditMode(true);
-    }
   };
 
   const logout = () => {
     setCurrentUser(null);
-    setIsAdminOpen(false);
-    setIsInlineEditMode(false);
     setIsOrdersOpen(false);
   };
 
@@ -626,6 +627,8 @@ Mohon konfirmasi ketersediaan dan langkah pembayaran selanjutnya. Terima kasih!`
         language,
         setLanguage,
         t,
+        isAdminRoute,
+        navigateTo,
         products,
         selectedCategory,
         setSelectedCategory,
@@ -663,18 +666,13 @@ Mohon konfirmasi ketersediaan dan langkah pembayaran selanjutnya. Terima kasih!`
         markAllNotificationsRead,
         playNotificationSound,
         currentUser,
-        isAdmin,
         login,
         logout,
-        isInlineEditMode,
-        setIsInlineEditMode,
+        isAdminAuthenticated,
+        loginAdmin,
+        logoutAdmin,
         adminActiveTab,
         setAdminActiveTab,
-        openAdminTab,
-        openAdminAccess,
-        directEditProduct,
-        setDirectEditProduct,
-        openProductEditor,
         isCartOpen,
         setIsCartOpen,
         isCheckoutOpen,
@@ -683,8 +681,6 @@ Mohon konfirmasi ketersediaan dan langkah pembayaran selanjutnya. Terima kasih!`
         setIsAuthOpen,
         authInitialTab,
         setAuthInitialTab,
-        isAdminOpen,
-        setIsAdminOpen,
         isOrdersOpen,
         setIsOrdersOpen,
         isCompanyModalOpen,

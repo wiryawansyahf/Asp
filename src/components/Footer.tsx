@@ -17,7 +17,6 @@ export const Footer: React.FC = () => {
     t, 
     companySettings, 
     setIsCompanyModalOpen, 
-    openAdminAccess, 
     formatWhatsAppUrl 
   } = useApp();
 
@@ -91,14 +90,6 @@ export const Footer: React.FC = () => {
                 <a href="#contact-whatsapp" className="hover:text-emerald-400 transition">
                   {t.navContact}
                 </a>
-              </li>
-              <li>
-                <button
-                  onClick={openAdminAccess}
-                  className="text-emerald-400 hover:text-emerald-300 transition text-left font-semibold"
-                >
-                  {t.navAdmin} & CMS
-                </button>
               </li>
             </ul>
           </div>

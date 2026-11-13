@@ -7,8 +7,7 @@ import {
   Percent, 
   Clock, 
   Layers,
-  ArrowUpDown,
-  Plus
+  ArrowUpDown
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ProductCard } from './ProductCard';
@@ -24,10 +23,7 @@ export const CatalogSection: React.FC = () => {
     badgeFilter, 
     setBadgeFilter, 
     sortBy, 
-    setSortBy,
-    isAdmin,
-    isInlineEditMode,
-    openProductEditor
+    setSortBy
   } = useApp();
 
   // Extract unique categories from products
@@ -94,17 +90,8 @@ export const CatalogSection: React.FC = () => {
             </p>
           </div>
 
-          {/* Quick Item Counter + Admin Add Button */}
+          {/* Quick Item Counter */}
           <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
-            {isAdmin && isInlineEditMode && (
-              <button
-                onClick={() => openProductEditor('new')}
-                className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-sm flex items-center gap-1.5 transition"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Tambah Produk Baru</span>
-              </button>
-            )}
             <div className="text-xs font-semibold text-slate-500 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs">
               Menampilkan <span className="text-emerald-700 font-bold">{filteredProducts.length}</span> dari {products.length} Produk
             </div>
